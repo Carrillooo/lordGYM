@@ -42,6 +42,22 @@ export const loginSchema = z
   })
   .strict();
 
+export const changePasswordSchema = z
+  .object({
+    current: z.string().min(1, 'Introduce tu contraseña actual.'),
+    next: z.string().min(8, 'La nueva contraseña debe tener al menos 8 caracteres.').max(200),
+    repeat: z.string().min(1, 'Repite la nueva contraseña.'),
+  })
+  .strict()
+  .refine((value) => value.next === value.repeat, {
+    message: 'Las dos contraseñas nuevas no coinciden.',
+    path: ['repeat'],
+  })
+  .refine((value) => value.next !== value.current, {
+    message: 'La nueva contraseña debe ser distinta de la actual.',
+    path: ['next'],
+  });
+
 export const athleteProfileSchema = z.object({
   sport: optionalString,
   position: optionalString,

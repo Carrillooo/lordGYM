@@ -170,6 +170,7 @@ create table if not exists public.exercises (
   technique text,
   video_url text,
   image_url text,
+  figure_key text,
   created_at timestamptz not null default now()
 );
 

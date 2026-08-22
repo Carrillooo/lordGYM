@@ -7,6 +7,7 @@ import { CATEGORY_LABELS, CATEGORY_ORDER } from '@/lib/domain/labels';
 import { normalizeText as normalize } from '@/lib/text';
 import { Modal } from '@/components/ui/modal';
 import { cn } from '@/lib/cn';
+import { ExerciseFigureFrame } from '@/components/exercise/exercise-figure';
 
 
 /** Selector de la biblioteca de ejercicios con búsqueda y filtro por categoría. */
@@ -87,6 +88,11 @@ export function ExerciseLibraryModal({
                   onClick={() => onPick(exercise.id)}
                   className="flex w-full items-center gap-3 rounded-xl border border-ink-800 bg-ink-900/50 p-3 text-left transition-colors hover:border-volt-500/40 hover:bg-ink-850"
                 >
+                  <ExerciseFigureFrame
+                    figureKey={exercise.figure_key}
+                    category={exercise.category}
+                    className="h-11 w-16 shrink-0"
+                  />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-medium text-ink-50">{exercise.name}</span>
                     <span className="block truncate text-xs text-ink-500">

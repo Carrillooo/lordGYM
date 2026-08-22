@@ -11,6 +11,8 @@ import { Badge, Card, EmptyState } from '@/components/ui/primitives';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { Input, Select, SubmitButton, Textarea } from '@/components/ui/form';
+import { ExerciseFigureFrame } from '@/components/exercise/exercise-figure';
+import { ExerciseDetailModal } from '@/components/exercise/exercise-detail';
 import { cn } from '@/lib/cn';
 
 export function ExerciseLibrary({ exercises, coachId }: { exercises: ExerciseRow[]; coachId: string }) {
@@ -18,6 +20,7 @@ export function ExerciseLibrary({ exercises, coachId }: { exercises: ExerciseRow
   const [category, setCategory] = useState('all');
   const [scope, setScope] = useState<'all' | 'own'>('all');
   const [editing, setEditing] = useState<ExerciseRow | null>(null);
+  const [viewing, setViewing] = useState<ExerciseRow | null>(null);
   const [creating, setCreating] = useState(false);
 
   const results = useMemo(() => {
@@ -101,17 +104,29 @@ export function ExerciseLibrary({ exercises, coachId }: { exercises: ExerciseRow
           {results.map((exercise) => (
             <li key={exercise.id}>
               <Card className="flex h-full flex-col">
-                <div className="flex items-start justify-between gap-2">
-                  <h2 className="font-semibold leading-tight text-ink-50">{exercise.name}</h2>
-                  {exercise.owner_coach_id === coachId ? <Badge tone="data">Propio</Badge> : null}
-                </div>
-                <p className="mt-1 text-xs text-ink-500">
-                  {CATEGORY_LABELS[exercise.category]}
-                  {exercise.movement_type ? ` · ${exercise.movement_type}` : ''}
-                </p>
-                {exercise.description ? (
-                  <p className="mt-2 line-clamp-2 text-sm text-ink-400">{exercise.description}</p>
-                ) : null}
+                <button
+                  type="button"
+                  onClick={() => setViewing(exercise)}
+                  className="-m-1 rounded-xl p-1 text-left transition-colors hover:bg-ink-800/40"
+                  aria-label={`Ver la ficha de ${exercise.name}`}
+                >
+                  <ExerciseFigureFrame
+                    figureKey={exercise.figure_key}
+                    category={exercise.category}
+                    className="aspect-[10/7] w-full"
+                  />
+                  <div className="mt-3 flex items-start justify-between gap-2">
+                    <h2 className="font-semibold leading-tight text-ink-50">{exercise.name}</h2>
+                    {exercise.owner_coach_id === coachId ? <Badge tone="data">Propio</Badge> : null}
+                  </div>
+                  <p className="mt-1 text-xs text-ink-500">
+                    {CATEGORY_LABELS[exercise.category]}
+                    {exercise.movement_type ? ` · ${exercise.movement_type}` : ''}
+                  </p>
+                  {exercise.description ? (
+                    <p className="mt-2 line-clamp-2 text-sm text-ink-400">{exercise.description}</p>
+                  ) : null}
+                </button>
 
                 {exercise.muscles.length > 0 ? (
                   <div className="mt-3 flex flex-wrap gap-1.5">
@@ -165,6 +180,7 @@ export function ExerciseLibrary({ exercises, coachId }: { exercises: ExerciseRow
         </ul>
       )}
 
+      <ExerciseDetailModal exercise={viewing} onClose={() => setViewing(null)} />
       <ExerciseFormModal open={creating} onClose={() => setCreating(false)} />
       <ExerciseFormModal open={editing !== null} onClose={() => setEditing(null)} exercise={editing ?? undefined} />
     </div>

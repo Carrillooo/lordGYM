@@ -4,7 +4,6 @@ import { ArrowLeft } from 'lucide-react';
 import { getCurrentUser } from '@/lib/auth/session';
 import { Wordmark } from '@/components/brand/wordmark';
 import { LoginForm } from '@/components/auth/login-form';
-import { DEMO_ATHLETE_EMAIL, DEMO_COACH_EMAIL, DEMO_PASSWORD } from '@/lib/seed';
 
 export const metadata = { title: 'Iniciar sesión' };
 
@@ -42,11 +41,7 @@ export default async function LoginPage({
           </p>
         </div>
 
-        <LoginForm
-          demoEmail={isAthlete ? DEMO_ATHLETE_EMAIL : DEMO_COACH_EMAIL}
-          demoPassword={DEMO_PASSWORD}
-          demoLabel={isAthlete ? 'Entrar con la cuenta demo de jugador' : 'Entrar con la cuenta demo de entrenador'}
-        />
+        <LoginForm />
 
         <p className="mt-8 text-center text-sm text-ink-400">
           ¿No tienes cuenta?{' '}

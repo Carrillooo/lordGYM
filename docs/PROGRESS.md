@@ -1,6 +1,6 @@
 # Estado del proyecto
 
-Última actualización: primera entrega completa.
+Última actualización: ilustraciones por ejercicio y retirada de los datos de demostración.
 
 ## Verificación
 
@@ -126,19 +126,46 @@ contraseña y cabeceras de seguridad. Detalle en [`SECURITY.md`](SECURITY.md).
 
 ---
 
+## Ilustraciones y contenido inicial
+
+Cada uno de los 48 ejercicios tiene **su propia ilustración** —figura humana en
+la postura clave del movimiento, dibujada en SVG en línea— además de la
+explicación de qué es y cómo se hace que ya traía. Se ven en la biblioteca del
+entrenador, en el selector del constructor y, sobre todo, en el modo
+entrenamiento, que es donde el jugador las necesita. Detalle del sistema en
+[`ARCHITECTURE.md`](ARCHITECTURE.md) y el porqué en
+[`DECISIONS.md`](DECISIONS.md) §14.
+
+**Ya no hay datos de demostración** (§15). El primer arranque crea la biblioteca,
+las pruebas físicas y dos cuentas vinculadas —Josep Sobervia como entrenador y
+Adrián Carrillo como jugador—, y nada más. Ambas pueden cambiar su contraseña
+desde la aplicación.
+
+Verificado en navegador contra PostgreSQL, con la base recién creada: el
+entrenador crea un entrenamiento, le añade un ejercicio desde el selector, se lo
+asigna a Adrián; el jugador lo ve, entrena con la ilustración y la explicación
+delante y registra las series. Cero errores de consola y cero respuestas 5xx.
+El cambio de contraseña también: rechaza la actual incorrecta, y tras cambiarla
+la antigua deja de servir y la nueva funciona.
+
+---
+
 ## Requiere acción del usuario
 
 Nada para probar la aplicación en local. Para producción:
 
 1. **`LORDGYM_SESSION_SECRET`**: generar una cadena larga y aleatoria
    (`openssl rand -hex 32`). Sin ella el arranque falla a propósito.
-2. **Base de datos** (obligatoria en Vercel, el disco no persiste): conectar un
+2. **Cambiar la contraseña inicial** de las dos cuentas nada más entrar: la de
+   por defecto (`lordgym2026`) está escrita en el repositorio. También se puede
+   fijar otra en `LORDGYM_INITIAL_PASSWORD` antes del primer arranque.
+3. **Base de datos** (obligatoria en Vercel, el disco no persiste): conectar un
    PostgreSQL — Neon o Vercel Postgres desde **Storage → Create Database** — y
    dejar que la integración inyecte `DATABASE_URL`. LORDGYM crea el esquema y
    siembra en el primer arranque, sin ejecutar ningún SQL a mano. La alternativa
    es Supabase (`supabase/schema.sql` + claves). Guía en
    [`DEPLOY.md`](DEPLOY.md); comprobación con `npm run check:db`.
-3. **Google Sign-In** (opcional, requiere Supabase): activar el proveedor y añadir
+4. **Google Sign-In** (opcional, requiere Supabase): activar el proveedor y añadir
    `https://<dominio>/auth/callback` a las *Redirect URLs*. Sin esto, el botón
    explica que falta configuración en lugar de fallar.
 

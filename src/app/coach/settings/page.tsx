@@ -4,6 +4,7 @@ import { STAFF_ROLE_LABELS, fullName } from '@/lib/domain/labels';
 import { Badge, Card, CardHeader, PageHeader } from '@/components/ui/primitives';
 import { CopyCodeButton } from '@/components/coach/copy-code-button';
 import { AccountForm } from '@/components/settings/account-form';
+import { PasswordForm } from '@/components/settings/password-form';
 import { TeamsPanel } from '@/components/coach/teams-panel';
 
 export const metadata = { title: 'Configuración' };
@@ -23,6 +24,11 @@ export default async function CoachSettingsPage() {
         </Card>
 
         <div className="space-y-4">
+          <Card>
+            <CardHeader title="Contraseña" subtitle="Se te pide la actual para poder cambiarla." />
+            <PasswordForm />
+          </Card>
+
           <Card>
             <CardHeader title="Código de entrenador" subtitle="Compártelo para que los jugadores se unan a tu equipo." />
             <p className="metric text-3xl text-volt-500">{coach.coach_code}</p>

@@ -5,7 +5,6 @@ import { getCurrentUser } from '@/lib/auth/session';
 import { deploymentIssue } from '@/lib/deployment';
 import { Wordmark } from '@/components/brand/wordmark';
 import { RoleCard } from '@/components/landing/role-card';
-import { DEMO_ATHLETE_EMAIL, DEMO_COACH_EMAIL, DEMO_PASSWORD } from '@/lib/seed';
 
 /**
  * Esta pantalla decide por petición: mira la cookie de sesión para redirigir y
@@ -86,15 +85,6 @@ export default async function HomePage() {
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
 
-          <p className="mt-4 max-w-md rounded-xl border border-ink-800 bg-ink-900/60 px-4 py-3 text-center text-xs leading-relaxed text-ink-400">
-            <span className="font-semibold text-ink-200">Cuentas de demostración</span>
-            <br />
-            Entrenador: <span className="text-ink-200">{DEMO_COACH_EMAIL}</span>
-            <br />
-            Jugador: <span className="text-ink-200">{DEMO_ATHLETE_EMAIL}</span>
-            <br />
-            Contraseña: <span className="text-ink-200">{DEMO_PASSWORD}</span>
-          </p>
         </div>
       </div>
     </main>

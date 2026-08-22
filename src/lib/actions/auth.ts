@@ -2,10 +2,10 @@
 
 import { redirect } from 'next/navigation';
 import { db } from '@/lib/db';
-import { authenticate, registerUser } from '@/lib/services/accounts';
+import { authenticate, changePassword, registerUser } from '@/lib/services/accounts';
 import { createSession, destroySession, getCurrentUser } from '@/lib/auth/session';
-import { loginSchema, registerSchema } from '@/lib/validation/schemas';
-import { errorState, fromException, zodFieldErrors, type ActionState } from './state';
+import { changePasswordSchema, loginSchema, registerSchema } from '@/lib/validation/schemas';
+import { errorState, fromException, successState, zodFieldErrors, type ActionState } from './state';
 
 function destination(role: 'coach' | 'athlete'): string {
   return role === 'coach' ? '/coach' : '/player';
@@ -58,21 +58,30 @@ export async function logoutAction(): Promise<void> {
   redirect('/');
 }
 
-/**
- * Acceso rápido a las cuentas demo desde la pantalla de login.
- * Sólo funciona con las credenciales sembradas: no crea cuentas nuevas.
- */
-export async function demoLoginAction(formData: FormData): Promise<void> {
-  const email = String(formData.get('email') ?? '');
-  const password = String(formData.get('password') ?? '');
-  const user = await authenticate(email, password);
-  const [profile] = await db().select('profiles', { user_id: user.id });
-  if (!profile) throw new Error('La cuenta demo no tiene perfil.');
-  await createSession(user.id);
-  redirect(destination(profile.role));
-}
-
 export async function currentUserRole(): Promise<'coach' | 'athlete' | null> {
   const current = await getCurrentUser();
   return current?.profile.role ?? null;
+}
+
+/**
+ * Cambio de contraseña desde los ajustes. Exige la actual, de modo que una
+ * sesión robada no baste para secuestrar la cuenta.
+ */
+export async function changePasswordAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = changePasswordSchema.safeParse({
+    current: formData.get('current'),
+    next: formData.get('next'),
+    repeat: formData.get('repeat'),
+  });
+  if (!parsed.success) return errorState('Revisa los datos.', zodFieldErrors(parsed.error));
+
+  const current = await getCurrentUser();
+  if (!current) return errorState('Tu sesión ha caducado. Vuelve a entrar.');
+
+  try {
+    await changePassword(current.user.id, parsed.data.current, parsed.data.next);
+  } catch (error) {
+    return fromException(error, 'No se ha podido cambiar la contraseña.');
+  }
+  return successState('Contraseña actualizada.');
 }

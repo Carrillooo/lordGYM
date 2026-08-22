@@ -108,6 +108,26 @@ agregaciones a vistas SQL detrás del mismo servicio, sin tocar la UI.
 
 ---
 
+## Ilustraciones de los ejercicios
+
+Cada ejercicio se ve, no sólo se lee. `components/exercise/` contiene un motor de
+dibujo (`figure-kit.tsx`) y una biblioteca de posturas (`poses.ts`): en lugar de
+40 dibujos sueltos hay **un solo renderizador y 40 descripciones de postura**
+—las coordenadas de la figura en el instante clave del movimiento, más el
+material que usa—, de modo que todas comparten proporciones, grosor de trazo y
+color y el conjunto se lee como un sistema.
+
+Son SVG en línea: cero peticiones de red, nítidas en cualquier pantalla, pesan
+nada y funcionan sin conexión (la PWA las tiene igual). No hay componente de
+cliente ni identificadores generados, así que se renderizan en servidor.
+
+Cada fila de `exercises` guarda su `figure_key`. Los 48 de la biblioteca usan su
+slug; los que crea el entrenador no traen clave y la postura se deduce de la
+categoría, así que **cualquier ejercicio nuevo tiene ilustración desde el primer
+momento**, sin que nadie tenga que subir nada.
+
+---
+
 ## Autenticación y autorización
 
 Ver [`SECURITY.md`](SECURITY.md). En resumen:

@@ -13,7 +13,7 @@ import {
   Video,
   X,
 } from 'lucide-react';
-import type { SetStatus } from '@/types/db';
+import type { ExerciseCategory, SetStatus } from '@/types/db';
 import { logSetAction } from '@/lib/actions/player';
 import { clearSession, dequeue, enqueue, pending } from '@/lib/offline/queue';
 import { formatDuration, formatShortDate } from '@/lib/domain/datetime';
@@ -25,6 +25,7 @@ import { RestTimer } from './rest-timer';
 import { FinishSheet } from './finish-sheet';
 import { ExitDialog } from './exit-dialog';
 import { ExerciseFeedback } from './exercise-feedback';
+import { ExerciseFigureFrame } from '@/components/exercise/exercise-figure';
 
 export interface TrainingSet {
   id: string;
@@ -46,7 +47,10 @@ export interface TrainingExercise {
   metricType: 'strength' | 'bodyweight' | 'time' | 'distance' | 'jump' | 'cardio';
   restSeconds: number;
   notes: string | null;
+  description: string | null;
   technique: string | null;
+  figureKey: string | null;
+  category: ExerciseCategory;
   videoUrl: string | null;
   supersetGroup: string | null;
   lastTime: { weightKg: number | null; reps: number | null; date: string }[];
@@ -288,13 +292,21 @@ export function TrainingSession({
 
         <section className="card p-4">
           <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
+            <div className="flex min-w-0 items-center gap-3">
+              <ExerciseFigureFrame
+                figureKey={exercise.figureKey}
+                category={exercise.category}
+                title={`Ilustración de ${exercise.name}`}
+                className="h-14 w-20 shrink-0 sm:h-16 sm:w-24"
+              />
+              <div className="min-w-0">
               <h1 className="display text-2xl uppercase text-ink-50">{exercise.name}</h1>
               <p className="mt-1 text-sm text-ink-400">
                 {exercise.sets.length} × {exercise.sets[0]?.targetReps ?? '—'}
                 {exercise.sets[0]?.targetWeightKg ? ` · objetivo ${exercise.sets[0].targetWeightKg} kg` : ''}
                 {exercise.restSeconds > 0 ? ` · descanso ${formatDuration(exercise.restSeconds)}` : ''}
               </p>
+              </div>
             </div>
             {exercise.videoUrl ? (
               <a
@@ -482,12 +494,21 @@ export function TrainingSession({
             initialVideoUrl={exercise.videoNote}
           />
 
-          {exercise.technique ? (
+          {exercise.technique || exercise.description ? (
             <details className="mt-4 text-sm">
               <summary className="cursor-pointer select-none text-xs font-medium uppercase tracking-wider text-ink-500">
-                Técnica
+                Cómo se hace
               </summary>
-              <p className="mt-2 text-ink-300">{exercise.technique}</p>
+              <div className="mt-3 space-y-3">
+                <ExerciseFigureFrame
+                  figureKey={exercise.figureKey}
+                  category={exercise.category}
+                  title={`Ilustración de ${exercise.name}`}
+                  className="aspect-[10/7] w-full max-w-xs"
+                />
+                {exercise.description ? <p className="text-ink-400">{exercise.description}</p> : null}
+                {exercise.technique ? <p className="text-ink-300">{exercise.technique}</p> : null}
+              </div>
             </details>
           ) : null}
         </section>

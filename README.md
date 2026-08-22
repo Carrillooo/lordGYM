@@ -18,18 +18,27 @@ npm run dev
 ```
 
 Abre <http://localhost:3000>. No hace falta configurar nada: la base de datos
-por defecto es un fichero JSON (`.lordgym-data/db.json`) que se siembra sola con
-la biblioteca de ejercicios y un equipo de demostración.
+por defecto es un fichero JSON (`.lordgym-data/db.json`) que se siembra sola.
 
-### Cuentas de demostración
+### Cuentas
 
-| Rol        | Email                | Contraseña    |
-| ---------- | -------------------- | ------------- |
-| Entrenador | `jusa@lordgym.app` | `lordgym2026` |
-| Jugador    | `adrian@lordgym.app` | `lordgym2026` |
+El primer arranque crea **la biblioteca de 48 ejercicios, las 13 pruebas físicas
+y dos cuentas vinculadas entre sí**. Nada más: ni sesiones inventadas, ni
+histórico de mentira, ni jugadores de relleno. El entrenador empieza con su
+plantilla y crea el primer entrenamiento él.
 
-También hay accesos directos en la pantalla de login. El código del entrenador
-demo es `LORD-A7K29` y su enlace de invitación `/join/A7K29`.
+| Rol        | Email                | Nombre          |
+| ---------- | -------------------- | --------------- |
+| Entrenador | `jusa@lordgym.app`   | Josep Sobervia  |
+| Jugador    | `adrian@lordgym.app` | Adrián Carrillo |
+
+La contraseña inicial de ambas es `lordgym2026`, o la que fijes en
+`LORDGYM_INITIAL_PASSWORD` **antes** del primer arranque. **Cámbiala nada más
+entrar**, desde Configuración (entrenador) o Perfil (jugador): no se muestra en
+ninguna pantalla pública, pero está escrita en este repositorio.
+
+El código del entrenador es `LORD-A7K29` y su enlace de invitación `/join/A7K29`:
+con él se une cualquier jugador nuevo.
 
 Para empezar de cero: `rm -rf .lordgym-data` y recarga.
 
@@ -132,7 +141,7 @@ src/
     auth/                   # contraseñas, sesión y guardas de autorización
     services/               # reglas de negocio
     actions/                # Server Actions (validadas con Zod)
-    seed/                   # biblioteca de ejercicios y datos demo
+    seed/                   # biblioteca de ejercicios y contenido inicial
   types/db.ts               # modelo de datos (fuente de verdad)
 supabase/schema.sql         # esquema para Supabase (con RLS)
 docs/                       # arquitectura, seguridad, decisiones y hoja de ruta
@@ -153,7 +162,7 @@ Todas las variables son opcionales en desarrollo. Copia `.env.example` a
 | `DATABASE_URL`                  | —                       | PostgreSQL: Neon, Vercel Postgres, servidor propio |
 | `LORDGYM_DB_DRIVER`             | automático              | Forzar `postgres`, `supabase` o `local`           |
 | `LORDGYM_DATA_FILE`             | `.lordgym-data/db.json` | Ruta del fichero del driver local                 |
-| `LORDGYM_SEED_DEMO`             | `true`                  | `false` siembra sólo la biblioteca, sin demo      |
+| `LORDGYM_INITIAL_PASSWORD`      | `lordgym2026`           | Contraseña inicial de las dos cuentas             |
 | `NEXT_PUBLIC_SUPABASE_URL`      | —                       | Proyecto de Supabase                              |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | —                | Clave pública (`sb_publishable_…` o la `anon`)    |
 | `SUPABASE_SECRET_KEY`           | —                       | Clave secreta, sólo servidor (o `service_role`)   |

@@ -207,3 +207,39 @@ valores van parametrizados, así que la cláusula `Where` no puede inyectar SQL.
 **Qué se pierde.** El panel de Supabase, su Storage y su Google Sign-In. Por eso
 el driver de Supabase se mantiene entero y sigue siendo una opción soportada:
 `LORDGYM_DB_DRIVER=supabase` la elige.
+
+
+---
+
+## 14. Ilustraciones propias en SVG, no fotos de terceros
+
+**Decisión.** Dibujar cada ejercicio con un motor de posturas propio en SVG en
+lugar de usar fotos o vídeos de bancos de imágenes o de otras webs de fitness.
+
+**Por qué.** Las imágenes de un catálogo ajeno son de su autor: copiarlas expone
+a quien publica la aplicación, no a quien las copió. Y aun con licencia, un
+catálogo de fotos ajenas trae 48 estilos distintos, pesa megas, exige una CDN y
+se rompe el día que el origen cambia de URL. Un sistema propio se ve coherente,
+no pide una sola petición de red, funciona sin conexión y cubre también los
+ejercicios que invente el entrenador.
+
+**Qué se pierde.** El realismo de una foto o de un vídeo. Se compensa en parte
+con el campo `video_url` de cada ejercicio, donde el entrenador puede enlazar su
+propia demostración, y con `image_url` para una foto sobre la que tenga derechos.
+
+---
+
+## 15. Sin datos de demostración
+
+**Decisión.** El sembrado inicial carga la biblioteca de ejercicios y de pruebas
+—que es contenido del producto— y **dos cuentas reales vinculadas**: nada más.
+Ni sesiones inventadas, ni histórico simulado, ni jugadores de relleno.
+
+**Por qué.** Los datos falsos son estupendos para enseñar un producto y pésimos
+para usarlo: el entrenador tiene que borrarlos uno a uno antes de empezar, y
+mientras tanto las gráficas, los récords y las estadísticas mienten. Un club que
+abre la aplicación quiere su plantilla, no la de un ejemplo.
+
+**Qué se pierde.** La portada ya no se puede enseñar con las gráficas llenas.
+A cambio, todo lo que aparece en pantalla ha ocurrido de verdad, que es la
+primera regla del proyecto.

@@ -1,21 +1,13 @@
 'use client';
 
 import { useActionState } from 'react';
-import { demoLoginAction, loginAction } from '@/lib/actions/auth';
+import { loginAction } from '@/lib/actions/auth';
 import { idleState } from '@/lib/actions/state';
 import { Input, SubmitButton } from '@/components/ui/form';
 import { Alert } from '@/components/ui/primitives';
 import { GoogleSignInButton } from './google-sign-in-button';
 
-export function LoginForm({
-  demoEmail,
-  demoPassword,
-  demoLabel,
-}: {
-  demoEmail: string;
-  demoPassword: string;
-  demoLabel: string;
-}) {
+export function LoginForm() {
   const [state, formAction] = useActionState(loginAction, idleState);
 
   return (
@@ -55,14 +47,6 @@ export function LoginForm({
       </div>
 
       <GoogleSignInButton />
-
-      <form action={demoLoginAction}>
-        <input type="hidden" name="email" value={demoEmail} />
-        <input type="hidden" name="password" value={demoPassword} />
-        <SubmitButton variant="ghost" size="md" className="w-full" pendingLabel="Cargando demo…">
-          {demoLabel}
-        </SubmitButton>
-      </form>
     </div>
   );
 }

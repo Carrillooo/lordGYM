@@ -61,16 +61,21 @@ siembra la biblioteca de 48 ejercicios y las 13 pruebas físicas.
 
 ## A4. Resumen de variables
 
-| Variable                  | Quién la pone            |
-| ------------------------- | ------------------------ |
-| `DATABASE_URL`            | Vercel, al conectar Neon |
-| `LORDGYM_SESSION_SECRET`  | Tú (paso A2)             |
-| `LORDGYM_SEED_DEMO=false` | Opcional (ver abajo)     |
+| Variable                    | Quién la pone            |
+| --------------------------- | ------------------------ |
+| `DATABASE_URL`              | Vercel, al conectar Neon |
+| `LORDGYM_SESSION_SECRET`    | Tú (paso A2)             |
+| `LORDGYM_INITIAL_PASSWORD`  | Opcional (ver abajo)     |
 
-Por defecto LORDGYM siembra el equipo de demostración (Carlos, Adrián y compañía)
-la primera vez que arranca, muy útil para enseñar el producto. Con `false` sólo
-carga la biblioteca de ejercicios y las pruebas, y empiezas con la base limpia
-para tu club.
+En el primer arranque LORDGYM carga la biblioteca de 48 ejercicios, las 13
+pruebas físicas y **dos cuentas vinculadas**: `jusa@lordgym.app` (Josep Sobervia,
+entrenador) y `adrian@lordgym.app` (Adrián Carrillo, jugador). No siembra ningún
+dato de mentira: ni sesiones, ni histórico, ni jugadores de relleno.
+
+La contraseña inicial de ambas es `lordgym2026`. **Ponla en
+`LORDGYM_INITIAL_PASSWORD` antes del primer despliegue**, o cámbiala nada más
+entrar desde Configuración (entrenador) o Perfil (jugador): la de por defecto
+está escrita en el repositorio, así que cualquiera que lo lea la conoce.
 
 También se aceptan `POSTGRES_URL`, `POSTGRES_PRISMA_URL` y
 `LORDGYM_DATABASE_URL`. Y hay dos ajustes opcionales:
@@ -130,6 +135,7 @@ NEXT_PUBLIC_SUPABASE_URL               https://xxxxxxxxxxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY   sb_publishable_...
 SUPABASE_SECRET_KEY                    sb_secret_...
 LORDGYM_SESSION_SECRET                 (openssl rand -hex 32)
+LORDGYM_INITIAL_PASSWORD               (opcional)
 ```
 
 Con el formato clásico, cambia las dos del medio por

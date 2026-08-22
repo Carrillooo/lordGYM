@@ -142,6 +142,8 @@ export interface ExerciseRow {
   technique: string | null;
   video_url: string | null;
   image_url: string | null;
+  /** Clave de la ilustración (ver `components/exercise/poses.ts`). */
+  figure_key: string | null;
   created_at: string;
 }
 

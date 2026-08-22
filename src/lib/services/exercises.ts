@@ -37,6 +37,8 @@ export async function createExercise(coachId: string, input: ExerciseInput): Pro
     technique: input.technique ?? null,
     video_url: input.videoUrl ?? null,
     image_url: input.imageUrl ?? null,
+    // Sin clave propia la ilustración se deduce de la categoría.
+    figure_key: null,
     created_at: nowIso(),
   };
   await db().insert('exercises', row);

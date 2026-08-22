@@ -7,6 +7,7 @@ import { ageFromBirthDate, formatShortDate, todayKey } from '@/lib/domain/dateti
 import { formatKg, formatNumber, formatPercent, fullName } from '@/lib/domain/labels';
 import { Avatar, Badge, Card, CardHeader, PageHeader, Stat } from '@/components/ui/primitives';
 import { AccountForm } from '@/components/settings/account-form';
+import { PasswordForm } from '@/components/settings/password-form';
 import { AthleteFicheForm } from '@/components/coach/athlete-fiche-form';
 import { JoinCoachForm } from '@/components/player/join-coach-form';
 import { LogoutButton } from '@/components/shell/logout-button';
@@ -86,6 +87,11 @@ export default async function PlayerProfilePage() {
       <Card>
         <CardHeader title="Cuenta" subtitle={user.email} />
         <AccountForm profile={profile} />
+      </Card>
+
+      <Card>
+        <CardHeader title="Contraseña" subtitle="Se te pide la actual para poder cambiarla." />
+        <PasswordForm />
       </Card>
 
       <LogoutButton className="card card-hover flex w-full items-center justify-center gap-2 p-4 text-sm font-medium text-danger-500">
