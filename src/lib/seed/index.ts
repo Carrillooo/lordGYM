@@ -24,7 +24,7 @@ import type {
 } from '@/types/db';
 
 export const DEMO_PASSWORD = 'lordgym2026';
-export const DEMO_COACH_EMAIL = 'carlos@lordgym.app';
+export const DEMO_COACH_EMAIL = 'jusa@lordgym.app';
 export const DEMO_ATHLETE_EMAIL = 'adrian@lordgym.app';
 export const DEMO_COACH_CODE = 'LORD-A7K29';
 

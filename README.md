@@ -25,7 +25,7 @@ la biblioteca de ejercicios y un equipo de demostración.
 
 | Rol        | Email                | Contraseña    |
 | ---------- | -------------------- | ------------- |
-| Entrenador | `carlos@lordgym.app` | `lordgym2026` |
+| Entrenador | `jusa@lordgym.app` | `lordgym2026` |
 | Jugador    | `adrian@lordgym.app` | `lordgym2026` |
 
 También hay accesos directos en la pantalla de login. El código del entrenador
