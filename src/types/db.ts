@@ -389,6 +389,17 @@ export interface GoalRow {
   created_at: string;
 }
 
+/**
+ * Estado interno de la aplicación. Hoy sólo guarda la marca de sembrado, que
+ * sirve además de cerrojo atómico: en serverless pueden arrancar varias
+ * instancias a la vez y sólo una debe sembrar (la clave primaria lo garantiza).
+ */
+export interface AppStateRow {
+  key: string;
+  value: string;
+  created_at: string;
+}
+
 export interface SessionTokenRow {
   id: string;
   user_id: string;
@@ -427,6 +438,7 @@ export interface Tables {
   coach_notes: CoachNoteRow;
   goals: GoalRow;
   auth_sessions: SessionTokenRow;
+  app_state: AppStateRow;
 }
 
 export type TableName = keyof Tables;
@@ -461,4 +473,5 @@ export const TABLE_NAMES: TableName[] = [
   'coach_notes',
   'goals',
   'auth_sessions',
+  'app_state',
 ];

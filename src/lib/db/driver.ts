@@ -29,8 +29,6 @@ export interface DataDriver {
   update<T extends TableName>(table: T, id: string, patch: Partial<Tables[T]>): Promise<Tables[T] | null>;
   remove<T extends TableName>(table: T, id: string): Promise<void>;
   removeWhere<T extends TableName>(table: T, where: Where): Promise<void>;
-  /** `true` si la base ya contiene datos (se usa para decidir el sembrado). */
-  isEmpty(): Promise<boolean>;
 }
 
 function isPlainFilterObject(value: Filter): value is Exclude<Filter, Primitive> {

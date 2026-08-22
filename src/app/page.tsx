@@ -1,17 +1,28 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowRight, ClipboardList, Dumbbell } from 'lucide-react';
+import { AlertTriangle, ArrowRight, ClipboardList, Dumbbell } from 'lucide-react';
 import { getCurrentUser } from '@/lib/auth/session';
+import { deploymentIssue } from '@/lib/deployment';
 import { Wordmark } from '@/components/brand/wordmark';
 import { RoleCard } from '@/components/landing/role-card';
 import { DEMO_ATHLETE_EMAIL, DEMO_COACH_EMAIL, DEMO_PASSWORD } from '@/lib/seed';
+
+/**
+ * Esta pantalla decide por petición: mira la cookie de sesión para redirigir y
+ * lee la configuración del entorno para avisar de lo que falte. Sin esto, el
+ * build la prerenderizaría con los valores del momento de compilar.
+ */
+export const dynamic = 'force-dynamic';
 
 /**
  * Pantalla de entrada (§3): sin landing larga. Dos opciones y dentro.
  * Si ya hay sesión se va directo al panel correspondiente.
  */
 export default async function HomePage() {
-  const current = await getCurrentUser();
+  const issue = deploymentIssue();
+  // Con el despliegue mal configurado ni siquiera se puede leer la sesión: se
+  // avisa antes de que el usuario choque con un error genérico al entrar.
+  const current = issue ? null : await getCurrentUser();
   if (current) redirect(current.profile.role === 'coach' ? '/coach' : '/player');
 
   return (
@@ -23,6 +34,27 @@ export default async function HomePage() {
             Entrena. Progresa. Domina.
           </p>
         </div>
+
+        {issue ? (
+          <div className="animate-rise mt-10 rounded-2xl border border-amber-glow/30 bg-amber-glow/[0.07] p-5 text-left">
+            <p className="flex items-center gap-2 font-semibold text-amber-glow">
+              <AlertTriangle className="h-4 w-4" />
+              {issue.title}
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-ink-300">{issue.detail}</p>
+            <ul className="mt-3 space-y-1">
+              {issue.variables.map((variable) => (
+                <li key={variable} className="font-mono text-xs text-ink-100">
+                  {variable}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-xs text-ink-400">
+              Guía completa en <span className="text-ink-200">supabase/README.md</span> y{' '}
+              <span className="text-ink-200">docs/DEPLOY.md</span> del repositorio.
+            </p>
+          </div>
+        ) : null}
 
         <div className="mt-12 grid gap-4 sm:mt-14 sm:grid-cols-2 sm:gap-5">
           <RoleCard

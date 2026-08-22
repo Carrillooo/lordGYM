@@ -10,7 +10,7 @@ Para producción multiusuario se usa Supabase.
 
 En el SQL editor del proyecto de Supabase, ejecuta `schema.sql`. Crea:
 
-- las 29 tablas del modelo (`src/types/db.ts`),
+- las 30 tablas del modelo (`src/types/db.ts`),
 - índices para las consultas del dashboard y del histórico,
 - funciones auxiliares `lg_current_coach_id()`, `lg_current_athlete_id()`,
   `lg_coach_has_athlete()` y `lg_athlete_has_coach()`,

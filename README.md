@@ -83,7 +83,7 @@ Para empezar de cero: `rm -rf .lordgym-data` y recarga.
 - Autenticación propia (scrypt + cookie de sesión firmada) y **Google** vía
   Supabase Auth.
 - **Autorización en servidor** en cada carga y cada mutación, más políticas
-  **Row Level Security** en las 29 tablas del esquema PostgreSQL.
+  **Row Level Security** en las 30 tablas del esquema PostgreSQL.
 - **PWA instalable** en iPhone y Android, con service worker y pantalla de
   «sin conexión».
 - **Modo offline**: las series se guardan en el móvil y se sincronizan al
@@ -99,7 +99,7 @@ npm run build      # build de producción
 npm start          # servir el build
 npm run lint       # ESLint (reglas de Next 16 + React Compiler)
 npm run typecheck  # TypeScript en modo estricto
-npm test           # Vitest (42 tests)
+npm test           # Vitest (51 tests)
 ```
 
 Los tests incluyen el ciclo completo del producto sin mocks: alta de entrenador
@@ -151,11 +151,17 @@ Todas las variables son opcionales en desarrollo. Copia `.env.example` a
 | `LORDGYM_SESSION_SECRET`        | efímera en desarrollo   | Firma las cookies. **Obligatoria en producción.** |
 | `LORDGYM_DB_DRIVER`             | `local`                 | `local` (JSON) o `supabase`                       |
 | `LORDGYM_DATA_FILE`             | `.lordgym-data/db.json` | Ruta del fichero del driver local                 |
+| `LORDGYM_SEED_DEMO`             | `true`                  | `false` siembra sólo la biblioteca, sin demo      |
 | `NEXT_PUBLIC_SUPABASE_URL`      | —                       | Proyecto de Supabase                              |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | —                       | Clave pública (login con Google)                  |
 | `SUPABASE_SERVICE_ROLE_KEY`     | —                       | Sólo servidor                                     |
 
 Para pasar a Supabase, sigue [`supabase/README.md`](supabase/README.md).
+
+**Para desplegar en Vercel**, la guía paso a paso está en
+[`docs/DEPLOY.md`](docs/DEPLOY.md). Dos avisos importantes: Vercel despliega la
+rama por defecto del repositorio, y en serverless **Supabase es obligatorio**
+(el disco no persiste). Si algo falta, la propia portada lo dice.
 
 ---
 

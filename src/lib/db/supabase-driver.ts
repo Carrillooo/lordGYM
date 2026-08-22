@@ -108,10 +108,4 @@ export const supabaseDriver: DataDriver = {
     const { error } = await query;
     if (error) throw new Error(`[supabase] deleteWhere ${table}: ${error.message}`);
   },
-
-  async isEmpty() {
-    const { data, error } = await getClient().from('users').select('id').limit(1);
-    if (error) throw new Error(`[supabase] isEmpty: ${error.message}`);
-    return (data ?? []).length === 0;
-  },
 };

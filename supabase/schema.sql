@@ -116,6 +116,14 @@ create table if not exists public.coach_athletes (
   unique (coach_id, athlete_id)
 );
 
+-- Estado interno de la aplicación. La clave primaria actúa de cerrojo: en
+-- serverless varias instancias pueden arrancar a la vez y sólo una debe sembrar.
+create table if not exists public.app_state (
+  key text primary key,
+  value text not null,
+  created_at timestamptz not null default now()
+);
+
 create table if not exists public.auth_sessions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.users (id) on delete cascade,
@@ -537,6 +545,9 @@ alter table public.messages          enable row level security;
 alter table public.notifications     enable row level security;
 alter table public.coach_notes       enable row level security;
 alter table public.goals             enable row level security;
+-- `app_state` queda con RLS activado y sin políticas: nadie accede con la anon
+-- key. Sólo el servidor (service role) lo lee y escribe.
+alter table public.app_state         enable row level security;
 
 -- Identidad ------------------------------------------------------------------
 

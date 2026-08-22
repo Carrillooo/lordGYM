@@ -37,16 +37,14 @@ Server Actions eliminan la capa de fetch, el estado de carga manual y la
 duplicación de tipos entre cliente y servidor. Cuando haga falta una API
 pública, los servicios ya están listos para exponerse por `app/api/`.
 
-Hay dos excepciones deliberadas en `app/api/`:
-
-- `auth/google/route.ts`, porque el cliente necesita enviar el token de Supabase
-  y recibir una respuesta JSON.
+Hay una excepción deliberada en `app/api/`: `auth/google/route.ts`, porque el
+cliente necesita enviar el token de Supabase y recibir una respuesta JSON.
 
 ---
 
 ## Modelo de datos
 
-`src/types/db.ts` es la fuente de verdad: 29 tablas con nombres idénticos a los
+`src/types/db.ts` es la fuente de verdad: 30 tablas con nombres idénticos a los
 del esquema PostgreSQL (`supabase/schema.sql`). El driver de Supabase es por eso
 una traducción directa, sin capa de mapeo.
 
@@ -61,6 +59,7 @@ Grupos:
 | Ejecución     | `assignments`, `workout_sessions`, `session_exercises`, `session_sets`         |
 | Seguimiento   | `personal_records`, `wellness_logs`, `pain_logs`, `bodyweight_logs`, `test_results`, `goals` |
 | Comunicación  | `messages`, `notifications`, `coach_notes`                                     |
+| Interno       | `app_state` (cerrojo de sembrado)                                              |
 
 ### Fechas (§106)
 
@@ -75,14 +74,19 @@ Grupos:
 ## Driver de datos
 
 `DataDriver` (`lib/db/driver.ts`) es un contrato mínimo: `select`, `insert`,
-`insertMany`, `update`, `remove`, `removeWhere`, `isEmpty`. Nada de negocio.
+`insertMany`, `update`, `remove` y `removeWhere`. Nada de negocio.
 
 - **`local-driver`** (por defecto): base JSON en disco, escritura atómica
   (temporal + `rename`) y cola de escrituras encadenada para que dos mutaciones
   simultáneas no se pisen. Pensado para desarrollo, demo y despliegues de un
   solo proceso.
 - **`supabase-driver`**: traduce la cláusula `Where` a PostgREST (`eq`, `in`,
-  `neq`, `gte/lte/gt/lt`, `is null`).
+  `neq`, `gte/lte/gt/lt`, `is null`). Es obligatorio en serverless: si LORDGYM
+  detecta Vercel o Lambda con el driver local, falla con un mensaje que dice qué
+  configurar, en lugar de perder los datos en silencio.
+
+El sembrado inicial se reclama con una fila en `app_state`, cuya clave primaria
+garantiza que varias instancias arrancando a la vez no siembren por duplicado.
 
 Consecuencia deliberada: los servicios cargan conjuntos y agregan en memoria en
 lugar de delegar en SQL. A la escala de un equipo (decenas de jugadores, miles

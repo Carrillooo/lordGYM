@@ -137,11 +137,6 @@ export const localDriver: DataDriver = {
     (db as Record<string, unknown[]>)[table] = next;
     await persist();
   },
-
-  async isEmpty() {
-    const db = await load();
-    return db.users.length === 0;
-  },
 };
 
 /** Sólo para tests: descarta la caché en memoria. */

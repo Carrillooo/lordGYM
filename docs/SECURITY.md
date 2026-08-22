@@ -52,7 +52,7 @@ pasa.
 
 ### 4. Row Level Security
 
-`supabase/schema.sql` activa RLS en las 29 tablas con políticas equivalentes a
+`supabase/schema.sql` activa RLS en las 30 tablas con políticas equivalentes a
 los guardas. Es la red de seguridad para cualquier acceso que no venga de la
 aplicación (anon key, herramientas externas, futuras integraciones).
 

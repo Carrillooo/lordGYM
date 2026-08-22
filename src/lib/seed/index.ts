@@ -2,7 +2,7 @@ import 'server-only';
 import { db } from '@/lib/db';
 import { hashPassword } from '@/lib/auth/password';
 import { newId } from '@/lib/domain/ids';
-import { addDays, todayKey } from '@/lib/domain/datetime';
+import { addDays, nowIso, todayKey } from '@/lib/domain/datetime';
 import { setVolume, trainingLoad } from '@/lib/domain/metrics';
 import { recomputeRecordsForAthlete } from '@/lib/services/sessions';
 import { EXERCISE_LIBRARY, TEST_LIBRARY } from './exercise-library';
@@ -426,13 +426,40 @@ async function createCompletedSession(options: {
   });
 }
 
+/** Clave del cerrojo de sembrado en `app_state`. */
+const SEED_KEY = 'seed';
+
+/**
+ * Reclama el sembrado de forma atómica.
+ *
+ * En serverless pueden arrancar varias instancias a la vez: sin esto, dos
+ * podrían sembrar en paralelo y dejar la base a medias. La clave primaria de
+ * `app_state` hace que sólo una inserción tenga éxito.
+ */
+async function claimSeed(): Promise<boolean> {
+  const [existing] = await db().select('app_state', { key: SEED_KEY });
+  if (existing) return false;
+  try {
+    await db().insert('app_state', { key: SEED_KEY, value: nowIso(), created_at: nowIso() });
+    return true;
+  } catch {
+    // Otra instancia ganó la carrera: no se ha escrito nada más.
+    return false;
+  }
+}
+
 /**
  * Siembra la base con la biblioteca de ejercicios, las pruebas físicas y el
- * equipo demo (§84–§86). Es idempotente: si ya hay usuarios no hace nada.
+ * equipo demo (§84–§86). Es idempotente y sólo se ejecuta una vez.
+ *
+ * Con `LORDGYM_SEED_DEMO=false` se carga únicamente la biblioteca global
+ * (ejercicios y pruebas), sin el equipo de demostración: es lo que quieres en
+ * una instalación real de un club.
  */
 export async function seedDemoData(): Promise<{ seeded: boolean }> {
-  if (!(await db().isEmpty())) return { seeded: false };
+  if (!(await claimSeed())) return { seeded: false };
 
+  const withDemo = (process.env.LORDGYM_SEED_DEMO ?? 'true').toLowerCase() !== 'false';
   const today = todayKey();
   const createdAt = new Date(`${addDays(today, -120)}T08:00:00.000Z`).toISOString();
 
@@ -465,6 +492,8 @@ export async function seedDemoData(): Promise<{ seeded: boolean }> {
   }));
   await db().insertMany('tests', testRows);
   const testBySlug = new Map(TEST_LIBRARY.map((seed, index) => [seed.slug, testRows[index]]));
+
+  if (!withDemo) return { seeded: true };
 
   // --- Entrenador demo ---------------------------------------------------
   const coachAccount = await createUser(
@@ -758,13 +787,21 @@ export async function seedDemoData(): Promise<{ seeded: boolean }> {
   return { seeded: true };
 }
 
-/** Garantiza el sembrado una sola vez por proceso. */
+/**
+ * Garantiza el sembrado una sola vez por proceso.
+ *
+ * No propaga el error a propósito: se llama desde el layout raíz y un fallo de
+ * configuración (por ejemplo, Supabase sin credenciales) no debe tumbar el
+ * renderizado ni la compilación. Las páginas que sí necesiten datos fallarán
+ * después con un mensaje concreto.
+ */
 let seedPromise: Promise<{ seeded: boolean }> | null = null;
 
 export function ensureSeeded(): Promise<{ seeded: boolean }> {
   seedPromise ??= seedDemoData().catch((error) => {
     seedPromise = null;
-    throw error;
+    console.error('[lordgym] no se ha podido sembrar la base:', error);
+    return { seeded: false };
   });
   return seedPromise;
 }
