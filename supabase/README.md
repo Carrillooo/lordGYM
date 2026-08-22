@@ -23,8 +23,8 @@ En el SQL editor del proyecto de Supabase, ejecuta `schema.sql`. Crea:
 ```bash
 LORDGYM_DB_DRIVER=supabase
 NEXT_PUBLIC_SUPABASE_URL=https://<proyecto>.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon>
-SUPABASE_SERVICE_ROLE_KEY=<service-role>   # sólo servidor
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_... # o NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SECRET_KEY=sb_secret_...           # o SUPABASE_SERVICE_ROLE_KEY. Sólo servidor
 LORDGYM_SESSION_SECRET=<cadena larga y aleatoria>
 ```
 

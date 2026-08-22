@@ -100,6 +100,7 @@ npm start          # servir el build
 npm run lint       # ESLint (reglas de Next 16 + React Compiler)
 npm run typecheck  # TypeScript en modo estricto
 npm test           # Vitest (51 tests)
+npm run check:supabase  # comprueba conexión, esquema y sembrado en Supabase
 ```
 
 Los tests incluyen el ciclo completo del producto sin mocks: alta de entrenador
@@ -153,8 +154,8 @@ Todas las variables son opcionales en desarrollo. Copia `.env.example` a
 | `LORDGYM_DATA_FILE`             | `.lordgym-data/db.json` | Ruta del fichero del driver local                 |
 | `LORDGYM_SEED_DEMO`             | `true`                  | `false` siembra sólo la biblioteca, sin demo      |
 | `NEXT_PUBLIC_SUPABASE_URL`      | —                       | Proyecto de Supabase                              |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | —                       | Clave pública (login con Google)                  |
-| `SUPABASE_SERVICE_ROLE_KEY`     | —                       | Sólo servidor                                     |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | —                | Clave pública (`sb_publishable_…` o la `anon`)    |
+| `SUPABASE_SECRET_KEY`           | —                       | Clave secreta, sólo servidor (o `service_role`)   |
 
 Para pasar a Supabase, sigue [`supabase/README.md`](supabase/README.md).
 

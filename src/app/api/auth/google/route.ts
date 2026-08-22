@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { db } from '@/lib/db';
+import { supabasePublicKey, supabaseUrl } from '@/lib/supabase/env';
 import { createSession } from '@/lib/auth/session';
 import { hashPassword } from '@/lib/auth/password';
 import { newCoachCode, newId } from '@/lib/domain/ids';
@@ -12,8 +13,8 @@ import type { AthleteRow, CoachRow, ProfileRow, UserRow } from '@/types/db';
  * Si el email no tenía cuenta se crea con el rol elegido antes del OAuth.
  */
 export async function POST(request: Request) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const url = supabaseUrl();
+  const anonKey = supabasePublicKey();
   if (!url || !anonKey) {
     return NextResponse.json({ error: 'Supabase Auth no está configurado en este despliegue.' }, { status: 501 });
   }

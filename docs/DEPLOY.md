@@ -24,17 +24,29 @@ Eso crea las 30 tablas, los índices y las políticas de seguridad (RLS).
 
 ## 2. Copiar las claves
 
-En Supabase: **Project Settings** (el engranaje) → **API**.
+En Supabase: **Project Settings** (el engranaje) → **API Keys**.
 
-| En Supabase se llama                     | Variable de LORDGYM             |
-| ---------------------------------------- | ------------------------------- |
-| Project URL                              | `NEXT_PUBLIC_SUPABASE_URL`      |
-| Project API keys → `anon` `public`       | `NEXT_PUBLIC_SUPABASE_ANON_KEY` |
-| Project API keys → `service_role` secret | `SUPABASE_SERVICE_ROLE_KEY`     |
+Supabase convive con dos formatos de clave. **LORDGYM acepta los dos**, así que
+puedes pegar tal cual lo que te dé el panel:
 
-> La `service_role` salta todas las reglas de seguridad. Va **sólo** en las
-> variables de entorno del servidor: nunca en el código, nunca en el navegador,
-> nunca en un repositorio público.
+| Lo que ves en Supabase                          | Variable de LORDGYM                                             |
+| ----------------------------------------------- | --------------------------------------------------------------- |
+| Project URL                                     | `NEXT_PUBLIC_SUPABASE_URL`                                        |
+| **Formato nuevo** · `sb_publishable_…`          | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`                            |
+| **Formato nuevo** · `sb_secret_…`               | `SUPABASE_SECRET_KEY`                                             |
+| *Formato clásico* · `anon` `public` (`eyJ…`)    | `NEXT_PUBLIC_SUPABASE_ANON_KEY`                                   |
+| *Formato clásico* · `service_role` (`eyJ…`)     | `SUPABASE_SERVICE_ROLE_KEY`                                       |
+
+Necesitas **la URL, una pública y una secreta**. No hace falta poner las cuatro
+claves: con el par de tu formato basta.
+
+> La clave secreta (`sb_secret_…` o `service_role`) salta todas las reglas de
+> seguridad. Va **sólo** en las variables de entorno del servidor: nunca en el
+> código, nunca en el navegador, nunca en un repositorio ni en un chat. Si se
+> expone, revócala en Supabase y genera otra.
+
+**La contraseña de la base de datos no se usa.** Ésa sólo sirve para conectarte
+a Postgres directamente (psql, DBeaver). LORDGYM habla por la API.
 
 ## 3. Generar la clave de sesión
 
@@ -54,12 +66,15 @@ Proyecto → **Settings** → **Environment Variables**. Añade estas cinco y
 márcalas para *Production*, *Preview* y *Development*:
 
 ```
-LORDGYM_DB_DRIVER          supabase
-NEXT_PUBLIC_SUPABASE_URL   https://xxxxxxxxxxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY   eyJhbGciOi... (la anon)
-SUPABASE_SERVICE_ROLE_KEY  eyJhbGciOi... (la service_role)
-LORDGYM_SESSION_SECRET     (los 64 caracteres del paso 3)
+LORDGYM_DB_DRIVER                      supabase
+NEXT_PUBLIC_SUPABASE_URL               https://xxxxxxxxxxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY   sb_publishable_...
+SUPABASE_SECRET_KEY                    sb_secret_...
+LORDGYM_SESSION_SECRET                 (los 64 caracteres del paso 3)
 ```
+
+Con el formato clásico, cambia las dos del medio por
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` y `SUPABASE_SERVICE_ROLE_KEY`.
 
 Opcional:
 
@@ -75,7 +90,19 @@ base limpia para tu club.
 Después de añadir variables hay que **volver a desplegar**: Deployments → el
 último → `···` → **Redeploy**. Vercel no las aplica al despliegue anterior.
 
-## 5. Sembrado
+## 5. Comprobar que todo está bien
+
+Antes de redesplegar puedes verificarlo desde tu ordenador. Copia las variables a
+un fichero `.env.local` en la raíz del proyecto y ejecuta:
+
+```bash
+npm run check:supabase
+```
+
+Te dice si la clave es válida, si están las 30 tablas y si ya se ha sembrado.
+No escribe nada: sólo lee.
+
+## 6. Sembrado
 
 La primera petición carga la biblioteca de ejercicios y las pruebas. El proceso
 se reclama con una fila en `app_state`, de modo que aunque Vercel arranque varias
@@ -84,7 +111,7 @@ instancias a la vez sólo una siembra y no se duplica nada.
 Para volver a empezar de cero: borra la fila `seed` de `app_state` y las tablas
 que quieras vaciar; en el siguiente arranque se siembra otra vez.
 
-## 6. Google Sign-In (opcional)
+## 7. Google Sign-In (opcional)
 
 1. Supabase → **Authentication** → **Providers** → **Google** → activar y pegar
    el Client ID y el Client Secret de Google Cloud.
@@ -106,6 +133,6 @@ falta.
 | ----------------------------------- | -------------------------------------------------------- |
 | `404: NOT_FOUND`                    | Vercel despliega una rama sin código (normalmente `main`) |
 | Aviso «Falta configurar la base…»   | `LORDGYM_DB_DRIVER` no es `supabase`                      |
-| Aviso «Faltan las claves…»          | Falta la URL o la service_role                            |
+| Aviso «Faltan las claves…»          | Falta la URL o la clave secreta                           |
 | Aviso «Falta la clave de sesión»    | Falta `LORDGYM_SESSION_SECRET`                            |
 | Error al entrar, portada bien       | El esquema SQL no se ha ejecutado en Supabase             |

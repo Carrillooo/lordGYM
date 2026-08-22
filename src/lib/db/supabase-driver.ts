@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { TableName, Tables } from '@/types/db';
+import { supabasePublicKey, supabaseSecretKey, supabaseUrl } from '@/lib/supabase/env';
 import type { DataDriver, Filter, SelectOptions, Where } from './driver';
 
 /**
@@ -9,16 +10,17 @@ import type { DataDriver, Filter, SelectOptions, Where } from './driver';
  * nombres de tabla y columna que `src/types/db.ts`, por eso este adaptador es
  * una traducción directa de la cláusula WHERE a la API de PostgREST.
  *
- * Usa la service role key porque toda la autorización se aplica en el servidor
+ * Usa la clave secreta porque toda la autorización se aplica en el servidor
  * (`lib/auth/guards.ts`) antes de llegar aquí. Las políticas RLS del esquema
- * protegen además cualquier acceso hecho con la anon key desde el cliente.
+ * protegen además cualquier acceso hecho con la clave pública desde el cliente.
  */
 function createSupabaseClient(): SupabaseClient {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const url = supabaseUrl();
+  const key = supabaseSecretKey() || supabasePublicKey();
   if (!url || !key) {
     throw new Error(
-      'LORDGYM_DB_DRIVER=supabase requiere NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY (o la anon key).',
+      'LORDGYM_DB_DRIVER=supabase requiere la URL del proyecto (NEXT_PUBLIC_SUPABASE_URL) y la clave ' +
+        'secreta (SUPABASE_SECRET_KEY o SUPABASE_SERVICE_ROLE_KEY).',
     );
   }
   return createClient(url, key, { auth: { persistSession: false } });
