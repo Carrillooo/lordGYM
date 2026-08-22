@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/cn';
-import { EXERCISE_METRIC_LABELS, type ExerciseMetric } from '@/lib/services/progress';
+import { EXERCISE_METRIC_LABELS, EXERCISE_METRICS, type ExerciseMetric } from '@/lib/domain/exercise-metrics';
 
 function useParamUpdater() {
   const router = useRouter();
@@ -45,14 +45,12 @@ export function ExercisePicker({
   );
 }
 
-const METRICS: ExerciseMetric[] = ['max_weight', 'volume', 'e1rm', 'reps', 'rpe'];
-
 export function MetricTabs({ selected, paramKey = 'metric' }: { selected: ExerciseMetric; paramKey?: string }) {
   const update = useParamUpdater();
 
   return (
     <div className="no-scrollbar -mx-1 flex gap-1.5 overflow-x-auto px-1" role="tablist">
-      {METRICS.map((metric) => (
+      {EXERCISE_METRICS.map((metric) => (
         <button
           key={metric}
           type="button"

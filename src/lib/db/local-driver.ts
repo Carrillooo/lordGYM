@@ -1,5 +1,7 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
+
+const DEFAULT_DATA_FILE = '.lordgym-data/db.json';
 import { TABLE_NAMES, type TableName, type Tables } from '@/types/db';
 import {
   applySelectOptions,
@@ -31,15 +33,23 @@ const globalScope = globalThis as unknown as Record<symbol, LocalState | undefin
 const state: LocalState = globalScope[GLOBAL_KEY] ?? { data: null, writeChain: Promise.resolve() };
 globalScope[GLOBAL_KEY] = state;
 
+/**
+ * Ruta del fichero de datos. Se devuelve tal cual: Node resuelve las rutas
+ * relativas contra el directorio de trabajo. Evitamos componerla con
+ * `process.cwd()` para que el analizador estático del bundler no acabe
+ * trazando todo el proyecto por una ruta que sólo existe en tiempo de
+ * ejecución.
+ */
 function dataFilePath(): string {
-  const configured = process.env.LORDGYM_DATA_FILE || '.lordgym-data/db.json';
-  return path.isAbsolute(configured) ? configured : path.join(process.cwd(), configured);
+  return process.env.LORDGYM_DATA_FILE || DEFAULT_DATA_FILE;
 }
 
 async function load(): Promise<Database> {
   if (state.data) return state.data;
   try {
-    const raw = await fs.readFile(dataFilePath(), 'utf8');
+    // La ruta sólo se conoce en ejecución; `turbopackIgnore` impide que el
+    // analizador estático incluya todo el proyecto en el trazado del bundle.
+    const raw = await fs.readFile(/* turbopackIgnore: true */ dataFilePath(), 'utf8');
     const parsed = JSON.parse(raw) as Partial<Database>;
     const db = emptyDatabase();
     for (const table of TABLE_NAMES) {
@@ -60,7 +70,7 @@ function persist(): Promise<void> {
     const file = dataFilePath();
     await fs.mkdir(path.dirname(file), { recursive: true });
     const tmp = `${file}.${process.pid}.tmp`;
-    await fs.writeFile(tmp, JSON.stringify(state.data, null, 2), 'utf8');
+    await fs.writeFile(/* turbopackIgnore: true */ tmp, JSON.stringify(state.data, null, 2), 'utf8');
     await fs.rename(tmp, file);
   });
   return state.writeChain;

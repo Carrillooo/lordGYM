@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /$
+Disallow: /coach
+Disallow: /player
+Disallow: /api

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useId } from 'react';
 import {
   Area,
   AreaChart,
@@ -99,7 +99,8 @@ export function TrendChart({
   className?: string;
 }) {
   const stroke = CHART_COLORS[color];
-  const gradientId = useMemo(() => `grad-${color}-${Math.random().toString(36).slice(2, 8)}`, [color]);
+  // `useId` da un identificador estable entre servidor y cliente, sin azar.
+  const gradientId = `grad-${color}-${useId().replace(/:/g, '')}`;
   const clean = data.filter((point) => point.value !== null);
 
   if (clean.length === 0) {

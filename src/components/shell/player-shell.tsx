@@ -14,6 +14,11 @@ import { isActive, PLAYER_NAV } from './nav-config';
 export function PlayerShell({ children, unreadCount }: { children: ReactNode; unreadCount: number }) {
   const pathname = usePathname();
 
+  // Modo entrenamiento (§88): pantalla limpia, sin navegación que distraiga.
+  if (pathname.startsWith('/player/workout/')) {
+    return <div className="min-h-dvh">{children}</div>;
+  }
+
   return (
     <div className="min-h-dvh pb-[calc(4.5rem+env(safe-area-inset-bottom))] sm:pb-24">
       <main className="mx-auto w-full max-w-2xl px-4 py-5 sm:px-6 sm:py-8">{children}</main>

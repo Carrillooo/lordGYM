@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { Wordmark } from '@/components/brand/wordmark';
@@ -16,7 +16,7 @@ import { getSupabaseBrowserClient } from '@/lib/supabase/browser';
  * contra Supabase antes de crear la sesión de LORDGYM: el cliente nunca decide
  * quién es el usuario.
  */
-export default function AuthCallbackPage() {
+function AuthCallback() {
   const router = useRouter();
   const params = useSearchParams();
   const [error, setError] = useState<string | null>(null);
@@ -80,5 +80,27 @@ export default function AuthCallbackPage() {
         </p>
       )}
     </main>
+  );
+}
+
+/**
+ * `useSearchParams` obliga a renderizar en cliente: la frontera de Suspense
+ * permite que el resto de la ruta se pueda prerenderizar sin errores.
+ */
+export default function AuthCallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-dvh flex-col items-center justify-center gap-6 px-5 text-center">
+          <Wordmark size="lg" />
+          <p className="flex items-center gap-2 text-sm text-ink-400">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Conectando con Google…
+          </p>
+        </main>
+      }
+    >
+      <AuthCallback />
+    </Suspense>
   );
 }

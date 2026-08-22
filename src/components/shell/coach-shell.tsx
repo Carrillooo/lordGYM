@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Bell, LogOut, Menu, Search, X } from 'lucide-react';
@@ -28,11 +28,6 @@ export function CoachShell({
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // El menú móvil se cierra al navegar.
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname]);
-
   const nav = (
     <nav className="flex flex-col gap-0.5" aria-label="Navegación principal">
       {COACH_NAV.map((item) => {
@@ -42,6 +37,7 @@ export function CoachShell({
           <Link
             key={item.href}
             href={item.href}
+            onClick={() => setMenuOpen(false)}
             aria-current={active ? 'page' : undefined}
             className={cn(
               'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',

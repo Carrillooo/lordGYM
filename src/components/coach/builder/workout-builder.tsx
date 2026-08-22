@@ -35,28 +35,28 @@ export function WorkoutBuilder({
   library: ExerciseRow[];
 }) {
   const router = useRouter();
-  const [order, setOrder] = useState<BuilderRow[]>(rows);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [pending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const dragIndex = useRef<number | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
-  // Si el servidor devuelve una lista distinta (alta/baja de ejercicio), se
-  // adopta como fuente de verdad.
-  const serverKey = rows.map((row) => row.workoutExercise.id).join('|');
-  const localKey = order.map((row) => row.workoutExercise.id).join('|');
-  if (serverKey !== localKey && !pending && dragIndex.current === null) {
-    setOrder(rows);
-  }
+  /**
+   * El servidor es la fuente de verdad del orden. `pendingOrder` sólo guarda la
+   * previsualización mientras se arrastra o hasta que el servidor confirma, así
+   * el componente nunca tiene que sincronizar estado con props en render.
+   */
+  const [pendingOrder, setPendingOrder] = useState<BuilderRow[] | null>(null);
+  const order = pendingOrder ?? rows;
 
   function persistOrder(next: BuilderRow[]) {
-    setOrder(next);
+    setPendingOrder(next);
     startTransition(async () => {
       await reorderExercisesAction(
         workoutId,
         next.map((row) => row.workoutExercise.id),
       );
       router.refresh();
+      setPendingOrder(null);
     });
   }
 
@@ -74,7 +74,7 @@ export function WorkoutBuilder({
     const [moved] = next.splice(dragIndex.current, 1);
     next.splice(index, 0, moved);
     dragIndex.current = index;
-    setOrder(next);
+    setPendingOrder(next);
   }
 
   function handleDragEnd() {
@@ -90,6 +90,7 @@ export function WorkoutBuilder({
     startTransition(async () => {
       await addExerciseAction(formData);
       router.refresh();
+      setPendingOrder(null);
     });
   }
 
@@ -97,10 +98,12 @@ export function WorkoutBuilder({
     const formData = new FormData();
     formData.set('workoutId', workoutId);
     formData.set('workoutExerciseId', workoutExerciseId);
-    setOrder((current) => current.filter((row) => row.workoutExercise.id !== workoutExerciseId));
+    // Retirada optimista: la fila desaparece antes de que responda el servidor.
+    setPendingOrder(order.filter((row) => row.workoutExercise.id !== workoutExerciseId));
     startTransition(async () => {
       await removeExerciseAction(formData);
       router.refresh();
+      setPendingOrder(null);
     });
   }
 
@@ -111,6 +114,7 @@ export function WorkoutBuilder({
     startTransition(async () => {
       await duplicateExerciseAction(formData);
       router.refresh();
+      setPendingOrder(null);
     });
   }
 

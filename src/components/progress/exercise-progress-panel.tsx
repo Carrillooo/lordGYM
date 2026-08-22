@@ -1,20 +1,16 @@
 import { TrendingDown, TrendingUp } from 'lucide-react';
+import { compareLastTwo, exerciseHistory, pickMetric, trainedExercises } from '@/lib/services/progress';
 import {
-  compareLastTwo,
+  EXERCISE_METRICS,
   EXERCISE_METRIC_LABELS,
   EXERCISE_METRIC_UNITS,
-  exerciseHistory,
-  pickMetric,
-  trainedExercises,
   type ExerciseMetric,
-} from '@/lib/services/progress';
+} from '@/lib/domain/exercise-metrics';
 import { formatShortDate } from '@/lib/domain/datetime';
 import { formatNumber, formatSigned } from '@/lib/domain/labels';
 import { Card, CardHeader, EmptyState } from '@/components/ui/primitives';
 import { TrendChart } from '@/components/charts/charts';
 import { ExercisePicker, MetricTabs } from './selectors';
-
-const VALID_METRICS: ExerciseMetric[] = ['max_weight', 'volume', 'e1rm', 'reps', 'rpe'];
 
 /**
  * Gráfica de progresión por ejercicio (§11, §71, §72).
@@ -43,7 +39,7 @@ export async function ExerciseProgressPanel({
   }
 
   const selected = exercises.find((exercise) => exercise.id === exerciseId) ?? exercises[0];
-  const selectedMetric: ExerciseMetric = VALID_METRICS.includes(metric as ExerciseMetric)
+  const selectedMetric: ExerciseMetric = EXERCISE_METRICS.includes(metric as ExerciseMetric)
     ? (metric as ExerciseMetric)
     : 'max_weight';
 

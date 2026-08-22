@@ -2,9 +2,8 @@ import 'server-only';
 import { db } from '@/lib/db';
 import { addDays, dateRange, startOfWeek, todayKey } from '@/lib/domain/datetime';
 import { acuteChronicRatio, adherence, currentStreak, epley1RM, round, setVolume } from '@/lib/domain/metrics';
+import type { ExerciseMetric } from '@/lib/domain/exercise-metrics';
 import type { ExerciseRow, PersonalRecordRow, SessionSetRow, WorkoutSessionRow } from '@/types/db';
-
-export type ExerciseMetric = 'max_weight' | 'volume' | 'e1rm' | 'reps' | 'rpe';
 
 export interface ExerciseHistoryPoint {
   date: string;
@@ -85,22 +84,6 @@ export function pickMetric(point: ExerciseHistoryPoint, metric: ExerciseMetric):
       return null;
   }
 }
-
-export const EXERCISE_METRIC_LABELS: Record<ExerciseMetric, string> = {
-  max_weight: 'Peso máximo',
-  volume: 'Volumen',
-  e1rm: '1RM estimado',
-  reps: 'Repeticiones',
-  rpe: 'RPE',
-};
-
-export const EXERCISE_METRIC_UNITS: Record<ExerciseMetric, string> = {
-  max_weight: 'kg',
-  volume: 'kg',
-  e1rm: 'kg',
-  reps: 'reps',
-  rpe: '',
-};
 
 /** Ejercicios que el jugador ha realizado alguna vez (para el selector). */
 export async function trainedExercises(athleteId: string): Promise<ExerciseRow[]> {

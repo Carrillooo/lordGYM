@@ -132,14 +132,16 @@ export function Stat({
             : 'text-ink-50';
 
   return (
-    <div className={cn('card p-4 sm:p-5', className)}>
+    <div className={cn('card p-3 sm:p-5', className)}>
       <div className="flex items-center justify-between gap-2">
-        <p className="text-xs font-medium uppercase tracking-wider text-ink-400">{label}</p>
-        {icon ? <span className="text-ink-500">{icon}</span> : null}
+        <p className="text-[11px] font-medium uppercase tracking-wider text-ink-400 sm:text-xs">{label}</p>
+        {icon ? <span className="shrink-0 text-ink-500">{icon}</span> : null}
       </div>
-      <p className={cn('metric mt-2 text-3xl sm:text-4xl', valueTone)}>
+      {/* La métrica encoge en móvil para que valores de 4 cifras + unidad
+          quepan en una tarjeta de tres columnas sin desbordar. */}
+      <p className={cn('metric mt-2 text-2xl leading-none sm:text-4xl', valueTone)}>
         {value}
-        {unit ? <span className="ml-1 text-base font-medium text-ink-400">{unit}</span> : null}
+        {unit ? <span className="ml-1 text-xs font-medium text-ink-400 sm:text-base">{unit}</span> : null}
       </p>
       {hint ? <p className="mt-1 text-xs text-ink-400">{hint}</p> : null}
     </div>
