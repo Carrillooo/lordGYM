@@ -22,7 +22,7 @@ export interface SelectOptions {
  * (JSON local ↔ Supabase/PostgreSQL) no toca ni una regla de dominio.
  */
 export interface DataDriver {
-  readonly name: 'local' | 'supabase';
+  readonly name: 'local' | 'supabase' | 'postgres';
   select<T extends TableName>(table: T, where?: Where, options?: SelectOptions): Promise<Tables[T][]>;
   insert<T extends TableName>(table: T, row: Tables[T]): Promise<Tables[T]>;
   insertMany<T extends TableName>(table: T, rows: Tables[T][]): Promise<Tables[T][]>;

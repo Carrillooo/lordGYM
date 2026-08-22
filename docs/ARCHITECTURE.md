@@ -76,14 +76,26 @@ Grupos:
 `DataDriver` (`lib/db/driver.ts`) es un contrato mínimo: `select`, `insert`,
 `insertMany`, `update`, `remove` y `removeWhere`. Nada de negocio.
 
-- **`local-driver`** (por defecto): base JSON en disco, escritura atómica
-  (temporal + `rename`) y cola de escrituras encadenada para que dos mutaciones
-  simultáneas no se pisen. Pensado para desarrollo, demo y despliegues de un
-  solo proceso.
+- **`local-driver`**: base JSON en disco, escritura atómica (temporal +
+  `rename`) y cola de escrituras encadenada para que dos mutaciones simultáneas
+  no se pisen. Pensado para desarrollo, demo y despliegues de un solo proceso.
+- **`postgres-driver`**: conexión directa con `pg` (Neon, Vercel Postgres, RDS,
+  servidor propio). Compone SQL parametrizado y valida nombres de tabla y
+  columna contra el modelo, de modo que ninguna cláusula pueda inyectarse. Ajusta
+  los parsers de tipo de node-postgres para que `numeric` y `bigint` lleguen como
+  números y los instantes como ISO en UTC, igual que en el driver local. Aplica
+  el esquema (`db/postgres-schema.ts`, todo `IF NOT EXISTS`) en el primer
+  arranque, así que conectar una base vacía es suficiente. Sin RLS: con conexión
+  directa el único cliente es este servidor y la autorización ya vive en
+  `auth/guards.ts`.
 - **`supabase-driver`**: traduce la cláusula `Where` a PostgREST (`eq`, `in`,
-  `neq`, `gte/lte/gt/lt`, `is null`). Es obligatorio en serverless: si LORDGYM
-  detecta Vercel o Lambda con el driver local, falla con un mensaje que dice qué
-  configurar, en lugar de perder los datos en silencio.
+  `neq`, `gte/lte/gt/lt`, `is null`), para quien prefiera la API y el panel de
+  Supabase. Ahí el esquema se aplica a mano y RLS sí es la segunda barrera.
+
+La elección es automática: driver explícito si se define `LORDGYM_DB_DRIVER`;
+si no, PostgreSQL cuando hay cadena de conexión en el entorno, y local si no hay
+nada. En serverless sin base de datos, LORDGYM falla con un mensaje que dice qué
+configurar, en lugar de perder los datos en silencio.
 
 El sembrado inicial se reclama con una fila en `app_state`, cuya clave primaria
 garantiza que varias instancias arrancando a la vez no siembren por duplicado.

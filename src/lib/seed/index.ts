@@ -1,5 +1,5 @@
 import 'server-only';
-import { db } from '@/lib/db';
+import { db, ensureDatabaseReady } from '@/lib/db';
 import { hashPassword } from '@/lib/auth/password';
 import { newId } from '@/lib/domain/ids';
 import { addDays, nowIso, todayKey } from '@/lib/domain/datetime';
@@ -457,6 +457,8 @@ async function claimSeed(): Promise<boolean> {
  * una instalación real de un club.
  */
 export async function seedDemoData(): Promise<{ seeded: boolean }> {
+  // Con PostgreSQL el esquema se aplica solo si falta, antes de nada.
+  await ensureDatabaseReady();
   if (!(await claimSeed())) return { seeded: false };
 
   const withDemo = (process.env.LORDGYM_SEED_DEMO ?? 'true').toLowerCase() !== 'false';

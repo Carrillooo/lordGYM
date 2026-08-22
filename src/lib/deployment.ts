@@ -1,5 +1,5 @@
 import 'server-only';
-import { isServerlessRuntime } from '@/lib/db';
+import { hasPostgresUrl, isServerlessRuntime } from '@/lib/db';
 import { supabasePublicKey, supabaseSecretKey, supabaseUrl } from '@/lib/supabase/env';
 
 export interface DeploymentIssue {
@@ -16,23 +16,22 @@ export interface DeploymentIssue {
  * driver de fichero funciona sin configurar nada).
  */
 export function deploymentIssue(): DeploymentIssue | null {
-  const driver = (process.env.LORDGYM_DB_DRIVER || 'local').toLowerCase();
+  const driver = (process.env.LORDGYM_DB_DRIVER || '').toLowerCase();
   const serverless = isServerlessRuntime();
+  // Una base PostgreSQL conectada (Neon, Vercel Postgres) basta por sí sola:
+  // la integración inyecta DATABASE_URL y el esquema se crea en el primer
+  // arranque, sin ejecutar nada a mano.
+  const hasDatabase = hasPostgresUrl() || driver === 'supabase' || driver === 'postgres';
 
-  if (serverless && driver !== 'supabase') {
+  if (serverless && !hasDatabase) {
     return {
-      title: 'Falta configurar la base de datos',
+      title: 'Falta conectar una base de datos',
       detail:
         'Este despliegue corre en un entorno serverless, donde el almacenamiento en fichero no ' +
-        'persiste. Crea un proyecto en Supabase, ejecuta supabase/schema.sql y añade estas ' +
-        'variables de entorno:',
-      variables: [
-        'LORDGYM_DB_DRIVER=supabase',
-        'NEXT_PUBLIC_SUPABASE_URL',
-        'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY  (o NEXT_PUBLIC_SUPABASE_ANON_KEY)',
-        'SUPABASE_SECRET_KEY  (o SUPABASE_SERVICE_ROLE_KEY)',
-        'LORDGYM_SESSION_SECRET',
-      ],
+        'persiste. Lo más rápido es añadir una base PostgreSQL desde la pestaña Storage de Vercel ' +
+        '(Neon): la integración define DATABASE_URL sola y LORDGYM crea el esquema al arrancar. ' +
+        'Sólo queda añadir a mano:',
+      variables: ['LORDGYM_SESSION_SECRET'],
     };
   }
 
@@ -54,6 +53,14 @@ export function deploymentIssue(): DeploymentIssue | null {
         variables: missing,
       };
     }
+  }
+
+  if (driver === 'postgres' && !hasPostgresUrl()) {
+    return {
+      title: 'Falta la cadena de conexión',
+      detail: 'Has activado el driver de PostgreSQL pero no hay ninguna base configurada:',
+      variables: ['DATABASE_URL  (o POSTGRES_URL)'],
+    };
   }
 
   if (process.env.NODE_ENV === 'production' && !process.env.LORDGYM_SESSION_SECRET) {

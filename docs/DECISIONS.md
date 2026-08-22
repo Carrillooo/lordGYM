@@ -179,3 +179,31 @@ migración. Así hay una sola fuente de verdad y funciona igual en local y en
 Supabase.
 
 **Qué se pierde.** No se puede sembrar desde `psql` sin arrancar la aplicación.
+
+---
+
+## 13. PostgreSQL directo como camino recomendado, con el esquema autoaplicado
+
+**Decisión.** Añadir un tercer driver (`postgres-driver`) que habla SQL con `pg`
+contra Neon, Vercel Postgres o un servidor propio, y elegirlo automáticamente
+cuando el entorno trae una cadena de conexión. El esquema se aplica solo en el
+primer arranque desde `db/postgres-schema.ts` (todo `IF NOT EXISTS`).
+
+**Por qué.** Con Supabase quedaban tres pasos manuales antes de que la aplicación
+funcionase: crear el proyecto, ejecutar `schema.sql` en el SQL Editor y copiar
+cuatro variables. Conectando una base PostgreSQL desde el propio panel de Vercel,
+la integración inyecta `DATABASE_URL` sola y no queda ningún SQL que ejecutar:
+sólo hay que añadir `LORDGYM_SESSION_SECRET`. Menos pasos es menos sitios donde
+un despliegue se queda a medias. Además se ahorra el salto por PostgREST, que
+añadía una llamada HTTP a cada lectura.
+
+**Seguridad.** El esquema de PostgreSQL directo no lleva RLS, a diferencia del de
+Supabase. No es un descuido: RLS protege de clientes que hablan con la base con
+la clave pública, y aquí el único cliente es este servidor. La autorización
+sigue donde siempre, en `auth/guards.ts`, comprobada en cada lectura y cada
+mutación. Los nombres de tabla y columna se validan contra el modelo y todos los
+valores van parametrizados, así que la cláusula `Where` no puede inyectar SQL.
+
+**Qué se pierde.** El panel de Supabase, su Storage y su Google Sign-In. Por eso
+el driver de Supabase se mantiene entero y sigue siendo una opción soportada:
+`LORDGYM_DB_DRIVER=supabase` la elige.

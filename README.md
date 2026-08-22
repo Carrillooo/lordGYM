@@ -99,8 +99,8 @@ npm run build      # build de producción
 npm start          # servir el build
 npm run lint       # ESLint (reglas de Next 16 + React Compiler)
 npm run typecheck  # TypeScript en modo estricto
-npm test           # Vitest (51 tests)
-npm run check:supabase  # comprueba conexión, esquema y sembrado en Supabase
+npm test           # Vitest (52 tests)
+npm run check:db   # comprueba conexión, esquema y sembrado de la base de datos
 ```
 
 Los tests incluyen el ciclo completo del producto sin mocks: alta de entrenador
@@ -134,7 +134,7 @@ src/
     actions/                # Server Actions (validadas con Zod)
     seed/                   # biblioteca de ejercicios y datos demo
   types/db.ts               # modelo de datos (fuente de verdad)
-supabase/schema.sql         # esquema PostgreSQL + RLS
+supabase/schema.sql         # esquema para Supabase (con RLS)
 docs/                       # arquitectura, seguridad, decisiones y hoja de ruta
 ```
 
@@ -150,18 +150,27 @@ Todas las variables son opcionales en desarrollo. Copia `.env.example` a
 | Variable                        | Por defecto             | Para qué                                          |
 | ------------------------------- | ----------------------- | ------------------------------------------------- |
 | `LORDGYM_SESSION_SECRET`        | efímera en desarrollo   | Firma las cookies. **Obligatoria en producción.** |
-| `LORDGYM_DB_DRIVER`             | `local`                 | `local` (JSON) o `supabase`                       |
+| `DATABASE_URL`                  | —                       | PostgreSQL: Neon, Vercel Postgres, servidor propio |
+| `LORDGYM_DB_DRIVER`             | automático              | Forzar `postgres`, `supabase` o `local`           |
 | `LORDGYM_DATA_FILE`             | `.lordgym-data/db.json` | Ruta del fichero del driver local                 |
 | `LORDGYM_SEED_DEMO`             | `true`                  | `false` siembra sólo la biblioteca, sin demo      |
 | `NEXT_PUBLIC_SUPABASE_URL`      | —                       | Proyecto de Supabase                              |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | —                | Clave pública (`sb_publishable_…` o la `anon`)    |
 | `SUPABASE_SECRET_KEY`           | —                       | Clave secreta, sólo servidor (o `service_role`)   |
 
-Para pasar a Supabase, sigue [`supabase/README.md`](supabase/README.md).
+Hay tres formas de guardar los datos y **no hace falta elegir a mano**: si existe
+una cadena de conexión de PostgreSQL se usa ésa, y si no, el fichero JSON local.
+
+- **PostgreSQL** (recomendado en producción): basta con `DATABASE_URL` — la
+  integración de Neon o Vercel Postgres la inyecta sola. LORDGYM **crea el
+  esquema y siembra en el primer arranque**, sin ejecutar ningún SQL a mano.
+- **Supabase**: `LORDGYM_DB_DRIVER=supabase` más las claves; el esquema se aplica
+  ejecutando `supabase/schema.sql`. Ver [`supabase/README.md`](supabase/README.md).
+- **Local**: sin configurar nada, para desarrollo.
 
 **Para desplegar en Vercel**, la guía paso a paso está en
 [`docs/DEPLOY.md`](docs/DEPLOY.md). Dos avisos importantes: Vercel despliega la
-rama por defecto del repositorio, y en serverless **Supabase es obligatorio**
+rama por defecto del repositorio, y en serverless **hace falta una base de datos**
 (el disco no persiste). Si algo falta, la propia portada lo dice.
 
 ---

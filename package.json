@@ -11,14 +11,16 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check:supabase": "node scripts/check-supabase.mjs"
+    "check:db": "node scripts/check-db.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",
+    "@types/pg": "^8.23.1",
     "clsx": "^2.1.1",
     "framer-motion": "^13.1.1",
     "lucide-react": "^0.545.0",
     "next": "16.3.2",
+    "pg": "^8.23.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "recharts": "^3.10.1",

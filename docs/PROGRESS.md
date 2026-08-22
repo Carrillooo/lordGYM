@@ -9,7 +9,7 @@ Todo lo que sigue está comprobado en esta misma entrega:
 ```
 npm run lint       ✓ sin errores ni avisos
 npm run typecheck  ✓ TypeScript estricto
-npm test           ✓ 51 tests (incluye el ciclo completo del producto)
+npm test           ✓ 52 tests (incluye el ciclo completo, en local y en PostgreSQL)
 npm run build      ✓ 32 rutas, sin avisos
 ```
 
@@ -132,10 +132,13 @@ Nada para probar la aplicación en local. Para producción:
 
 1. **`LORDGYM_SESSION_SECRET`**: generar una cadena larga y aleatoria
    (`openssl rand -hex 32`). Sin ella el arranque falla a propósito.
-2. **Supabase** (opcional, recomendado para multiusuario): crear el proyecto,
-   ejecutar `supabase/schema.sql` y rellenar las variables. Ver
-   [`supabase/README.md`](../supabase/README.md).
-3. **Google Sign-In** (opcional): activar el proveedor en Supabase y añadir
+2. **Base de datos** (obligatoria en Vercel, el disco no persiste): conectar un
+   PostgreSQL — Neon o Vercel Postgres desde **Storage → Create Database** — y
+   dejar que la integración inyecte `DATABASE_URL`. LORDGYM crea el esquema y
+   siembra en el primer arranque, sin ejecutar ningún SQL a mano. La alternativa
+   es Supabase (`supabase/schema.sql` + claves). Guía en
+   [`DEPLOY.md`](DEPLOY.md); comprobación con `npm run check:db`.
+3. **Google Sign-In** (opcional, requiere Supabase): activar el proveedor y añadir
    `https://<dominio>/auth/callback` a las *Redirect URLs*. Sin esto, el botón
    explica que falta configuración en lugar de fallar.
 
@@ -145,7 +148,8 @@ Nada para probar la aplicación en local. Para producción:
 
 Por orden sugerido:
 
-1. Subida de ficheros con Supabase Storage (desbloquea vídeos y fotos reales).
+1. Subida de ficheros (desbloquea vídeos y fotos reales): Vercel Blob si la base
+   es PostgreSQL, o Supabase Storage si se usa Supabase.
 2. Informe PDF del jugador reutilizando lo que ya calcula `services/progress`.
 3. Notificaciones push y recordatorio de sesión.
 4. Modo claro: segundo juego de tokens en `globals.css` y conmutador en ajustes.
