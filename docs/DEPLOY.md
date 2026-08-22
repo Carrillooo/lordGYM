@@ -188,13 +188,23 @@ Con todo bien configurado, al abrir el dominio deberías ver la pantalla de acce
 ### Si el `404` no se va
 
 El `404: NOT_FOUND` lo sirve Vercel antes de llegar a la aplicación, así que
-nunca es un fallo del código. Repasa, por este orden:
+nunca es un fallo del código. El código del error distingue dos casos muy
+distintos:
+
+- **`DEPLOYMENT_NOT_FOUND`**: no hay ningún despliegue asignado al dominio.
+- **`NOT_FOUND`** (a secas): sí hay un despliegue sirviendo, pero no encuentra
+  nada en esa ruta. Es la firma de un proyecto construido como sitio estático,
+  sin `index.html`, es decir con el *Framework Preset* equivocado.
+
+Repasa, por este orden:
 
 1. **Settings → Git**: que el repositorio conectado sea el correcto y que
    *Production Branch* sea `main`.
 2. **Settings → General → Framework Preset**: debe poner **Next.js**. Si el
    proyecto se creó cuando el repositorio sólo tenía un README, Vercel lo detectó
-   como *Other* y publica un sitio estático vacío. Cámbialo y vuelve a desplegar.
+   como *Other* y publica un sitio estático vacío. El `vercel.json` de la raíz ya
+   fuerza `"framework": "nextjs"` (lo de `vercel.json` manda sobre lo del panel),
+   pero sólo se lee si el *Root Directory* es correcto.
 3. **Root Directory**: `./` (vacío). La aplicación está en la raíz del repo.
 4. **Deployments**: que haya un despliegue posterior al último push y que esté en
    *Ready*, no en *Error*. Si no hay ninguno, pulsa **Redeploy**.
