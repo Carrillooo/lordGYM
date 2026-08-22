@@ -469,6 +469,52 @@ export async function abandonSession(athleteId: string, sessionId: string): Prom
   if (session.assignment_id) await db().update('assignments', session.assignment_id, { status: 'skipped' });
 }
 
+export interface AthleteFeedback {
+  sessionId: string;
+  date: string;
+  exerciseName: string;
+  comment: string | null;
+  videoUrl: string | null;
+}
+
+/**
+ * Comentarios y vídeos que el jugador ha dejado en sus ejercicios (§75, §77).
+ * Es lo que ve el entrenador en la ficha del deportista.
+ */
+export async function recentAthleteFeedback(athleteId: string, limit = 8): Promise<AthleteFeedback[]> {
+  const sessions = await db().select(
+    'workout_sessions',
+    { athlete_id: athleteId },
+    { orderBy: { column: 'started_at', ascending: false }, limit: 40 },
+  );
+  if (sessions.length === 0) return [];
+
+  const sessionExercises = await db().select('session_exercises', { session_id: { in: sessions.map((s) => s.id) } });
+  const withFeedback = sessionExercises.filter((se) => se.athlete_comment || se.video_url);
+  if (withFeedback.length === 0) return [];
+
+  const exercises = await db().select('exercises', { id: { in: withFeedback.map((se) => se.exercise_id) } });
+  const nameById = new Map(exercises.map((e) => [e.id, e.name]));
+  const sessionById = new Map(sessions.map((s) => [s.id, s]));
+
+  return withFeedback
+    .flatMap((se) => {
+      const session = sessionById.get(se.session_id);
+      if (!session) return [];
+      return [
+        {
+          sessionId: session.id,
+          date: (session.completed_at ?? session.started_at).slice(0, 10),
+          exerciseName: nameById.get(se.exercise_id) ?? 'Ejercicio',
+          comment: se.athlete_comment,
+          videoUrl: se.video_url,
+        },
+      ];
+    })
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, limit);
+}
+
 export async function recentSessions(athleteId: string, limit = 20): Promise<WorkoutSessionRow[]> {
   return db().select(
     'workout_sessions',

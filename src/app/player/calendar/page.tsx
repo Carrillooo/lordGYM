@@ -148,8 +148,13 @@ export default async function PlayerCalendarPage({
                 {view.assignment.notes ? <p className="mt-2 text-sm text-ink-400">{view.assignment.notes}</p> : null}
 
                 <div className="mt-3">
-                  {view.assignment.status === 'completed' ? (
-                    <ButtonLink href="/player/progress" variant="secondary" size="sm" className="w-full">
+                  {view.assignment.status === 'completed' && view.session ? (
+                    <ButtonLink
+                      href={`/player/workout/${view.session.id}`}
+                      variant="secondary"
+                      size="sm"
+                      className="w-full"
+                    >
                       Ver resultados
                     </ButtonLink>
                   ) : view.session ? (

@@ -1,7 +1,15 @@
 import 'server-only';
 import { db } from '@/lib/db';
 import { addDays, dateRange, startOfWeek, todayKey } from '@/lib/domain/datetime';
-import { acuteChronicRatio, adherence, currentStreak, epley1RM, round, setVolume } from '@/lib/domain/metrics';
+import {
+  acuteChronicRatio,
+  adherence,
+  currentStreak,
+  epley1RM,
+  round,
+  setVolume,
+  suggestProgression,
+} from '@/lib/domain/metrics';
 import type { ExerciseMetric } from '@/lib/domain/exercise-metrics';
 import type { ExerciseRow, PersonalRecordRow, SessionSetRow, WorkoutSessionRow } from '@/types/db';
 
@@ -239,5 +247,48 @@ export function compareLastTwo(points: ExerciseHistoryPoint[], metric: ExerciseM
     previous,
     current,
     changePercent: round(((current - previous) / previous) * 100, 1),
+  };
+}
+
+export interface ProgressionSuggestion {
+  exerciseName: string;
+  lastWeightKg: number;
+  suggestedWeightKg: number;
+  shouldIncrease: boolean;
+  reason: string;
+}
+
+/**
+ * Sugerencia de progresión para un ejercicio (§69, §70).
+ *
+ * Es explícitamente una *sugerencia*: LORDGYM no cambia nada solo, y la
+ * interfaz deja claro que la última decisión es del entrenador. Tampoco
+ * constituye una indicación médica.
+ */
+export async function progressionSuggestion(
+  athleteId: string,
+  exerciseId: string,
+): Promise<ProgressionSuggestion | null> {
+  const history = await exerciseHistory(athleteId, exerciseId);
+  if (history.length === 0) return null;
+
+  const last = history[history.length - 1];
+  if (last.maxWeightKg === null || last.maxWeightKg <= 0) return null;
+
+  const [exercise] = await db().select('exercises', { id: exerciseId });
+  if (!exercise || exercise.metric_type !== 'strength') return null;
+
+  const recentRpes = [...history]
+    .reverse()
+    .map((point) => point.avgRpe)
+    .filter((value): value is number => typeof value === 'number');
+
+  const result = suggestProgression({ lastWeightKg: last.maxWeightKg, recentSessionRpes: recentRpes });
+  return {
+    exerciseName: exercise.name,
+    lastWeightKg: last.maxWeightKg,
+    suggestedWeightKg: result.suggestedWeightKg,
+    shouldIncrease: result.shouldIncrease,
+    reason: result.reason,
   };
 }

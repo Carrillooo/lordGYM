@@ -1,5 +1,11 @@
-import { TrendingDown, TrendingUp } from 'lucide-react';
-import { compareLastTwo, exerciseHistory, pickMetric, trainedExercises } from '@/lib/services/progress';
+import { Lightbulb, TrendingDown, TrendingUp } from 'lucide-react';
+import {
+  compareLastTwo,
+  exerciseHistory,
+  pickMetric,
+  progressionSuggestion,
+  trainedExercises,
+} from '@/lib/services/progress';
 import {
   EXERCISE_METRICS,
   EXERCISE_METRIC_LABELS,
@@ -22,11 +28,14 @@ export async function ExerciseProgressPanel({
   exerciseId,
   metric,
   title = 'Progresión por ejercicio',
+  showSuggestion = false,
 }: {
   athleteId: string;
   exerciseId?: string;
   metric?: string;
   title?: string;
+  /** Sólo el entrenador ve la sugerencia de progresión (§69). */
+  showSuggestion?: boolean;
 }) {
   const exercises = await trainedExercises(athleteId);
   if (exercises.length === 0) {
@@ -45,6 +54,7 @@ export async function ExerciseProgressPanel({
 
   const history = await exerciseHistory(athleteId, selected.id);
   const comparison = compareLastTwo(history, selectedMetric);
+  const suggestion = showSuggestion ? await progressionSuggestion(athleteId, selected.id) : null;
   const unit = EXERCISE_METRIC_UNITS[selectedMetric];
   const latest = history.length > 0 ? pickMetric(history[history.length - 1], selectedMetric) : null;
 
@@ -97,6 +107,31 @@ export async function ExerciseProgressPanel({
         color={selectedMetric === 'rpe' ? 'amber' : selectedMetric === 'volume' ? 'data' : 'volt'}
         height={230}
       />
+
+      {suggestion ? (
+        <div
+          className={
+            suggestion.shouldIncrease
+              ? 'mt-4 flex items-start gap-2.5 rounded-xl border border-volt-500/30 bg-volt-500/[0.06] px-3 py-2.5'
+              : 'mt-4 flex items-start gap-2.5 rounded-xl border border-ink-800 bg-ink-900/50 px-3 py-2.5'
+          }
+        >
+          <Lightbulb
+            className={suggestion.shouldIncrease ? 'mt-0.5 h-4 w-4 shrink-0 text-volt-500' : 'mt-0.5 h-4 w-4 shrink-0 text-ink-500'}
+          />
+          <div className="min-w-0 text-sm">
+            <p className="font-medium text-ink-100">
+              {suggestion.shouldIncrease
+                ? `Sugerencia: subir a ${formatNumber(suggestion.suggestedWeightKg, 1)} kg`
+                : 'Sugerencia: mantener la carga'}
+            </p>
+            <p className="mt-0.5 text-xs text-ink-400">
+              {suggestion.reason} Última carga registrada {formatNumber(suggestion.lastWeightKg, 1)} kg. La decisión
+              final es tuya.
+            </p>
+          </div>
+        </div>
+      ) : null}
 
       <div className="mt-5 overflow-x-auto">
         <table className="w-full min-w-[420px] text-sm">

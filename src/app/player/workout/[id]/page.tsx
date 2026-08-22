@@ -1,8 +1,10 @@
 import { notFound, redirect } from 'next/navigation';
 import { requireAthlete } from '@/lib/auth/guards';
 import { getSessionDetail } from '@/lib/services/sessions';
+import { db } from '@/lib/db';
 import { TrainingSession } from '@/components/player/training/training-session';
 import type { TrainingExercise } from '@/components/player/training/training-session';
+import { SessionSummary } from '@/components/player/training/session-summary';
 
 export const metadata = { title: 'Entrenando' };
 
@@ -12,7 +14,25 @@ export default async function PlayerWorkoutPage({ params }: { params: Promise<{ 
 
   const detail = await getSessionDetail(id);
   if (!detail || detail.session.athlete_id !== athlete.id) notFound();
-  if (detail.session.status === 'completed') redirect('/player');
+
+  // Una sesión cerrada no desaparece: se convierte en su propio resumen (§23),
+  // así el jugador siempre lo ve al terminar y puede volver a consultarlo.
+  if (detail.session.status === 'completed') {
+    const records = await db().select('personal_records', { athlete_id: athlete.id, session_id: id });
+    const exerciseNames = new Map(
+      detail.exercises.map((row) => [row.exercise.id, row.exercise.name] as const),
+    );
+    return (
+      <SessionSummary
+        detail={detail}
+        records={records
+          .filter((record) => record.record_type !== 'e1rm')
+          .map((record) => ({ ...record, exerciseName: exerciseNames.get(record.exercise_id) ?? 'Ejercicio' }))}
+      />
+    );
+  }
+
+  if (detail.session.status === 'skipped') redirect('/player');
 
   const exercises: TrainingExercise[] = detail.exercises.map((row) => ({
     sessionExerciseId: row.sessionExercise.id,
@@ -25,6 +45,8 @@ export default async function PlayerWorkoutPage({ params }: { params: Promise<{ 
     supersetGroup: row.sessionExercise.superset_group,
     lastTime: row.lastTime,
     bestWeightKg: row.bestWeightKg,
+    athleteComment: row.sessionExercise.athlete_comment,
+    videoNote: row.sessionExercise.video_url,
     sets: row.sets.map((set) => ({
       id: set.id,
       index: set.set_index,

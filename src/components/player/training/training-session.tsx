@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import {
   Check,
   ChevronLeft,
@@ -25,6 +24,7 @@ import { Badge, ProgressBar } from '@/components/ui/primitives';
 import { RestTimer } from './rest-timer';
 import { FinishSheet } from './finish-sheet';
 import { ExitDialog } from './exit-dialog';
+import { ExerciseFeedback } from './exercise-feedback';
 
 export interface TrainingSet {
   id: string;
@@ -51,6 +51,8 @@ export interface TrainingExercise {
   supersetGroup: string | null;
   lastTime: { weightKg: number | null; reps: number | null; date: string }[];
   bestWeightKg: number | null;
+  athleteComment: string | null;
+  videoNote: string | null;
   sets: TrainingSet[];
 }
 
@@ -79,7 +81,6 @@ export function TrainingSession({
   startedAt: string;
   exercises: TrainingExercise[];
 }) {
-  const router = useRouter();
   const [current, setCurrent] = useState(0);
   const [elapsed, setElapsed] = useState(() => Math.max(0, Math.floor((Date.now() - Date.parse(startedAt)) / 1000)));
   const [rest, setRest] = useState<{ seconds: number; key: number } | null>(null);
@@ -474,6 +475,13 @@ export function TrainingSession({
             </div>
           ) : null}
 
+          <ExerciseFeedback
+            key={exercise.sessionExerciseId}
+            sessionExerciseId={exercise.sessionExerciseId}
+            initialComment={exercise.athleteComment}
+            initialVideoUrl={exercise.videoNote}
+          />
+
           {exercise.technique ? (
             <details className="mt-4 text-sm">
               <summary className="cursor-pointer select-none text-xs font-medium uppercase tracking-wider text-ink-500">
@@ -565,8 +573,10 @@ export function TrainingSession({
         sessionId={sessionId}
         elapsedSeconds={elapsed}
         onFinished={() => {
+          // Sin refrescar la ruta: al quedar la sesión completada, la propia
+          // ruta redirige a /player y el jugador se perdería el resumen (§23).
+          // Los datos ya se revalidan desde la Server Action.
           clearSession(sessionId);
-          router.refresh();
         }}
       />
 

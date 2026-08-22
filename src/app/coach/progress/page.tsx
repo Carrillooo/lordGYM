@@ -69,6 +69,7 @@ export default async function CoachProgressPage({
         exerciseId={exercise}
         metric={metric}
         title={`Progresión de ${selected.profile.first_name}`}
+        showSuggestion
       />
 
       <div className="grid gap-4 lg:grid-cols-2">

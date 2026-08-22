@@ -1,9 +1,13 @@
 import { z } from 'zod';
 import { CATEGORY_ORDER, SET_TYPE_ORDER } from '@/lib/domain/labels';
 
-/** Convierte "" en `undefined` para que `.optional()` funcione con FormData. */
+/**
+ * Normaliza "vacío" a `undefined` para que `.optional()` funcione tanto con
+ * `FormData` (que da `null` cuando el campo no existe) como con los payloads
+ * JSON de los componentes cliente, que envían `null` explícito.
+ */
 const emptyToUndefined = (value: unknown) =>
-  typeof value === 'string' && value.trim() === '' ? undefined : value;
+  value === null || (typeof value === 'string' && value.trim() === '') ? undefined : value;
 
 export const optionalString = z.preprocess(emptyToUndefined, z.string().trim().max(2000).optional());
 export const optionalNumber = z.preprocess(

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, CalendarPlus, MessageSquare, Ruler, Target, Weight } from 'lucide-react';
+import { ArrowLeft, CalendarPlus, MessageSquare, Quote, Ruler, Target, Video, Weight } from 'lucide-react';
 import { requireCoach } from '@/lib/auth/guards';
 import { getAthleteForCoach } from '@/lib/services/roster';
 import {
@@ -10,7 +10,7 @@ import {
   personalRecords,
   volumeSeries,
 } from '@/lib/services/progress';
-import { recentSessions } from '@/lib/services/sessions';
+import { recentAthleteFeedback, recentSessions } from '@/lib/services/sessions';
 import { assignmentsForAthlete } from '@/lib/services/assignments';
 import { wellnessHistory, painHistory } from '@/lib/services/wellness';
 import { testProgressForAthlete } from '@/lib/services/tests';
@@ -60,6 +60,7 @@ export default async function CoachPlayerDetailPage({
     load,
     volume,
     status,
+    feedback,
   ] = await Promise.all([
     athleteOverview(athlete.id, today),
     personalRecords(athlete.id),
@@ -74,6 +75,7 @@ export default async function CoachPlayerDetailPage({
     loadSeries(athlete.id, 28, today),
     volumeSeries(athlete.id, 8, today),
     getRosterStatus(coach.id, athlete.id, today),
+    recentAthleteFeedback(athlete.id, 6),
   ]);
 
   const age = ageFromBirthDate(profile.birth_date, today);
@@ -174,7 +176,7 @@ export default async function CoachPlayerDetailPage({
         />
       </div>
 
-      <ExerciseProgressPanel athleteId={athlete.id} exerciseId={exercise} metric={metric} />
+      <ExerciseProgressPanel athleteId={athlete.id} exerciseId={exercise} metric={metric} showSuggestion />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
@@ -380,6 +382,42 @@ export default async function CoachPlayerDetailPage({
               </tbody>
             </table>
           </div>
+        </Card>
+      ) : null}
+
+      {feedback.length > 0 ? (
+        <Card>
+          <CardHeader
+            title="Comentarios del jugador"
+            subtitle="Lo que ha escrito durante sus sesiones (§75, §77)"
+          />
+          <ul className="space-y-2">
+            {feedback.map((item, index) => (
+              <li key={`${item.sessionId}-${index}`} className="rounded-xl border border-ink-800 bg-ink-900/40 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm font-medium text-ink-100">{item.exerciseName}</span>
+                  <span className="text-xs text-ink-500">{formatShortDate(item.date)}</span>
+                </div>
+                {item.comment ? (
+                  <p className="mt-1.5 flex items-start gap-2 text-sm text-ink-300">
+                    <Quote className="mt-0.5 h-3 w-3 shrink-0 text-ink-600" />
+                    {item.comment}
+                  </p>
+                ) : null}
+                {item.videoUrl ? (
+                  <a
+                    href={item.videoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-data-500 hover:underline"
+                  >
+                    <Video className="h-3.5 w-3.5" />
+                    Ver vídeo de la serie
+                  </a>
+                ) : null}
+              </li>
+            ))}
+          </ul>
         </Card>
       ) : null}
 
