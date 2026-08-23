@@ -19,12 +19,18 @@ const ROOT = process.env.LORDGYM_MEDIA_DIR || '.lordgym-media';
 /**
  * Comprueba que la ruta pedida cae dentro del directorio de medios.
  * Sin esto, un `..` en el nombre leería cualquier fichero del servidor.
+ *
+ * La comprobación se hace sobre la ruta relativa y el resultado se compone a
+ * mano, sin `path.resolve`. No es capricho: resolver contra el directorio de
+ * trabajo una ruta que sólo se conoce en ejecución hace que el analizador del
+ * bundler trace el proyecto entero y lo meta en el paquete del servidor —el
+ * mismo motivo por el que `db/local-driver.ts` devuelve su ruta tal cual—.
  */
 export function resolveInsideRoot(pathname: string): string | null {
-  const root = path.resolve(ROOT);
-  const target = path.resolve(root, pathname);
-  if (target !== root && !target.startsWith(root + path.sep)) return null;
-  return target;
+  if (pathname.includes('\0') || path.isAbsolute(pathname)) return null;
+  const relative = path.normalize(pathname);
+  if (relative === '..' || relative.startsWith(`..${path.sep}`)) return null;
+  return `${ROOT.replace(/\/+$/, '')}/${relative}`;
 }
 
 export const localMediaDriver: MediaDriver = {
