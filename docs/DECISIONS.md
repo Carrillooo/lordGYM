@@ -260,3 +260,49 @@ punto: la hoja que te llevas al gimnasio enseña lo mismo que la pantalla.
 
 **Qué se pierde.** Una dependencia más y unos 100 kB en el servidor. A cambio no
 hay que mantener un segundo juego de estilos sólo para el papel.
+
+
+---
+
+## 17. Las ilustraciones se animan con SMIL, y los isométricos no se mueven
+
+**Decisión.** Cada postura puede declarar el otro extremo del recorrido (`end`)
+y la figura lo recorre de ida y vuelta con `<animate>` dentro del propio SVG.
+Los ejercicios isométricos —plancha, pino, front lever, L-sit…— se quedan
+quietos a propósito.
+
+**Por qué.** Un GIF de ejercicio pesa entre 200 kB y 2 MB, se pixela al ampliarlo
+y hay que descargarlo. Aquí el movimiento son unos cientos de bytes de marcado
+sobre un dibujo que ya estaba: se ve nítido a cualquier tamaño, funciona sin
+conexión y el navegador lo interpola en el compositor sin coste de JavaScript.
+Y como se interpola punto a punto, un ejercicio nuevo se anima escribiendo su
+postura final, sin dibujar un solo fotograma más.
+
+Lo de los isométricos no es pereza: una plancha **no se mueve**, y animarla
+enseñaría mal el ejercicio. El movimiento tiene que ser verdad, igual que los
+datos.
+
+**Qué se pierde.** SMIL no se puede apagar desde CSS, así que la versión animada
+es un componente de cliente para poder respetar `prefers-reduced-motion`. Las
+listas siguen usando la versión estática, servida desde el servidor: 128
+miniaturas moviéndose a la vez serían ruido, no información.
+
+---
+
+## 18. De wger se toma el catálogo, no los textos
+
+**Decisión.** Usar el catálogo abierto de [wger](https://github.com/wger-project/wger)
+—CC-BY-SA— para decidir **qué** ejercicios cubrir, y escribir en LORDGYM las
+descripciones y la técnica.
+
+**Por qué.** Dos razones, y las dos pesan. La legal: CC-BY-SA obliga a atribuir y
+a mantener la misma licencia sobre el texto derivado; incrustar sus párrafos
+enredaría la aplicación en una obligación que no hace falta asumir. Y la de
+producto: su catálogo es multilingüe y desigual, con fichas traducidas a medias.
+Una biblioteca donde las 128 fichas están escritas con la misma voz y el mismo
+nivel de detalle vale más que uno con 872 de calidad variable.
+
+**Qué se pierde.** Volumen. Se importaron 34 variantes bien escogidas en lugar de
+los 872 registros: cada una con la ilustración del patrón que le corresponde, en
+vez de cientos cayendo en un dibujo genérico. La atribución a wger está en el
+README.

@@ -25,7 +25,7 @@ import { RestTimer } from './rest-timer';
 import { FinishSheet } from './finish-sheet';
 import { ExitDialog } from './exit-dialog';
 import { ExerciseFeedback } from './exercise-feedback';
-import { ExerciseFigureFrame } from '@/components/exercise/exercise-figure';
+import { AnimatedExerciseFigureFrame } from '@/components/exercise/exercise-figure-animated';
 
 export interface TrainingSet {
   id: string;
@@ -293,7 +293,7 @@ export function TrainingSession({
         <section className="card p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
-              <ExerciseFigureFrame
+              <AnimatedExerciseFigureFrame
                 figureKey={exercise.figureKey}
                 category={exercise.category}
                 title={`Ilustración de ${exercise.name}`}
@@ -500,7 +500,7 @@ export function TrainingSession({
                 Cómo se hace
               </summary>
               <div className="mt-3 space-y-3">
-                <ExerciseFigureFrame
+                <AnimatedExerciseFigureFrame
                   figureKey={exercise.figureKey}
                   category={exercise.category}
                   title={`Ilustración de ${exercise.name}`}

@@ -5,13 +5,13 @@ import type { ExerciseRow } from '@/types/db';
 import { CATEGORY_LABELS, METRIC_LABELS } from '@/lib/domain/labels';
 import { Badge } from '@/components/ui/primitives';
 import { Modal } from '@/components/ui/modal';
-import { ExerciseFigureFrame } from './exercise-figure';
+import { AnimatedExerciseFigureFrame } from './exercise-figure-animated';
 
 /** Ficha completa: ilustración, para qué sirve y cómo se hace. */
 export function ExerciseDetail({ exercise }: { exercise: ExerciseRow }) {
   return (
     <div className="space-y-5">
-      <ExerciseFigureFrame
+      <AnimatedExerciseFigureFrame
         figureKey={exercise.figure_key}
         category={exercise.category}
         title={`Ilustración de ${exercise.name}`}

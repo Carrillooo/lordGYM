@@ -1,6 +1,6 @@
 # Estado del proyecto
 
-Última actualización: calistenia y gimnasio, PDF imprimible y repaso del móvil.
+Última actualización: ilustraciones animadas y 128 ejercicios.
 
 ## Verificación
 
@@ -168,6 +168,27 @@ horizontal, no queda ninguna zona táctil por debajo de 44 px, los campos de kg,
 reps y RPE miden 48 px y abren el teclado numérico, y el mapa de dolor tiene
 ahora un desplegable alternativo, porque sus zonas no pueden ser todas grandes
 sin destrozar el dibujo.
+
+---
+
+## Ilustraciones en movimiento
+
+Cada postura puede declarar el otro extremo del recorrido y la figura lo hace de
+ida y vuelta, animada dentro del propio SVG. **117 de los 128 ejercicios se
+mueven**; los 11 restantes son isométricos —plancha, pino, front lever, L-sit,
+bandera— y se quedan quietos a propósito, porque una plancha no se mueve.
+
+No hay ningún GIF: el movimiento son unos cientos de bytes de marcado sobre un
+dibujo que ya existía. Se ve nítido a cualquier tamaño, funciona sin conexión y
+respeta «Reducir movimiento» del sistema. Las listas usan la versión estática:
+128 miniaturas moviéndose a la vez serían ruido.
+
+La biblioteca pasa de 94 a **128 ejercicios** con 34 variantes escogidas del
+catálogo abierto de [wger](https://github.com/wger-project/wger) (CC-BY-SA):
+press estrecho y declinado, aperturas, curl con barra y en polea, remo en T,
+jalón estrecho, hiperextensiones, sentadilla hack y sumo, swing con kettlebell,
+press Arnold… Los textos son propios; de wger se tomó qué cubrir, no su
+contenido. El porqué está en [`DECISIONS.md`](DECISIONS.md) §17 y §18.
 
 ---
 

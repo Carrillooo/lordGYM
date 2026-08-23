@@ -21,6 +21,11 @@ export const POSES = {
     legNear: [[116, 85], [134, 104], [132, 124]],
     props: [GROUND, { kind: 'bench', at: [100, 88], width: 98 }],
     propsFront: [{ kind: 'barbell', at: [90, 54], width: 52 }],
+    end: {
+      armFar: [[84, 83], [74, 84], [90, 74]],
+      armNear: [[84, 83], [94, 84], [90, 74]],
+      propsFront: [[90, 72]],
+    },
   },
   'bench-press-db': {
     head: [66, 80],
@@ -34,6 +39,11 @@ export const POSES = {
       { kind: 'dumbbell', at: [80, 54] },
       { kind: 'dumbbell', at: [98, 54] },
     ],
+    end: {
+      armFar: [[84, 83], [72, 82], [78, 74]],
+      armNear: [[84, 83], [96, 82], [100, 74]],
+      propsFront: [[78, 72], [100, 72]],
+    },
   },
   'incline-press': {
     head: [116, 58],
@@ -48,6 +58,11 @@ export const POSES = {
       { kind: 'line', from: [70, 118], to: [98, 122] },
     ],
     propsFront: [{ kind: 'barbell', at: [122, 44], width: 48 }],
+    end: {
+      armFar: [[106, 70], [120, 76], [124, 62]],
+      armNear: [[106, 70], [118, 70], [124, 62]],
+      propsFront: [[124, 60]],
+    },
   },
   pushup: {
     head: [152, 84],
@@ -57,6 +72,14 @@ export const POSES = {
     legFar: [[76, 102], [57, 110], [38, 119]],
     legNear: [[76, 102], [59, 111], [40, 120]],
     props: [GROUND],
+    end: {
+      head: [152, 98],
+      spine: [[142, 102], [76, 110]],
+      armFar: [[138, 104], [124, 112], [133, 122]],
+      armNear: [[138, 104], [128, 113], [139, 122]],
+      legFar: [[76, 110], [57, 115], [38, 120]],
+      legNear: [[76, 110], [59, 116], [40, 121]],
+    },
   },
   dip: {
     head: [100, 44],
@@ -72,6 +95,14 @@ export const POSES = {
       { kind: 'line', from: [64, 62], to: [90, 62] },
       { kind: 'line', from: [110, 62], to: [136, 62] },
     ],
+    end: {
+      head: [100, 34],
+      spine: [[99, 46], [96, 78]],
+      armFar: [[100, 50], [110, 56], [118, 62]],
+      armNear: [[98, 50], [90, 56], [82, 62]],
+      legFar: [[96, 78], [103, 92], [89, 99]],
+      legNear: [[96, 78], [106, 92], [92, 100]],
+    },
   },
   'overhead-press': {
     head: [100, 46],
@@ -82,6 +113,11 @@ export const POSES = {
     legNear: [[100, 88], [104, 106], [102, 124]],
     props: [GROUND],
     propsFront: [{ kind: 'barbell', at: [100, 24], width: 56 }],
+    end: {
+      armFar: [[98, 60], [110, 66], [112, 58]],
+      armNear: [[98, 60], [86, 66], [88, 58]],
+      propsFront: [[100, 56]],
+    },
   },
   landmine: {
     head: [88, 46],
@@ -92,6 +128,11 @@ export const POSES = {
     legNear: [[98, 88], [94, 106], [92, 124]],
     props: [GROUND],
     propsFront: [{ kind: 'cable', from: [34, 122], to: [126, 54], tower: false }],
+    end: {
+      armFar: [[94, 60], [100, 68], [106, 66]],
+      armNear: [[94, 60], [101, 66], [108, 62]],
+      propsFront: [[108, 62]],
+    },
   },
   'lateral-raise': {
     head: [100, 32],
@@ -105,6 +146,11 @@ export const POSES = {
       { kind: 'dumbbell', at: [64, 52], angle: 90 },
       { kind: 'dumbbell', at: [136, 52], angle: 90 },
     ],
+    end: {
+      armFar: [[103, 47], [108, 64], [110, 80]],
+      armNear: [[97, 47], [92, 64], [90, 80]],
+      propsFront: [[88, 82], [112, 82]],
+    },
   },
 
   // --- Tracción -------------------------------------------------------------
@@ -116,6 +162,14 @@ export const POSES = {
     legFar: [[100, 94], [103, 112], [92, 120]],
     legNear: [[100, 94], [106, 112], [95, 120]],
     props: [{ kind: 'rig', at: [100, 35], width: 78, drop: 18 }],
+    end: {
+      head: [100, 72],
+      spine: [[100, 82], [100, 112]],
+      armFar: [[101, 84], [108, 60], [116, 37]],
+      armNear: [[99, 84], [92, 60], [84, 37]],
+      legFar: [[100, 112], [103, 126], [92, 132]],
+      legNear: [[100, 112], [106, 126], [95, 132]],
+    },
   },
   'lat-pulldown': {
     head: [106, 68],
@@ -131,6 +185,12 @@ export const POSES = {
       { kind: 'cable', from: [100, 18], to: [100, 34], tower: false },
     ],
     propsFront: [{ kind: 'barbell', at: [100, 34], width: 44 }],
+    end: {
+      armFar: [[102, 81], [116, 72], [120, 58]],
+      armNear: [[102, 81], [88, 72], [80, 58]],
+      props: [null, null, null, [100, 56]],
+      propsFront: [[100, 56]],
+    },
   },
   'row-barbell': {
     head: [128, 60],
@@ -141,6 +201,11 @@ export const POSES = {
     legNear: [[88, 80], [95, 102], [93, 124]],
     props: [GROUND, { kind: 'arrow', from: [116, 118], to: [116, 104] }],
     propsFront: [{ kind: 'barbell', at: [115, 100], width: 54 }],
+    end: {
+      armFar: [[118, 68], [110, 78], [112, 86]],
+      armNear: [[118, 68], [126, 78], [120, 86]],
+      propsFront: [[115, 88]],
+    },
   },
   'row-db': {
     head: [148, 74],
@@ -151,6 +216,10 @@ export const POSES = {
     legNear: [[98, 86], [88, 104], [88, 124]],
     props: [GROUND, { kind: 'bench', at: [104, 92], width: 78 }],
     propsFront: [{ kind: 'dumbbell', at: [126, 100], angle: 90 }],
+    end: {
+      armNear: [[136, 80], [132, 94], [130, 106]],
+      propsFront: [[130, 108]],
+    },
   },
   'face-pull': {
     head: [92, 44],
@@ -160,6 +229,11 @@ export const POSES = {
     legFar: [[98, 88], [96, 106], [94, 124]],
     legNear: [[98, 88], [102, 106], [100, 124]],
     props: [GROUND, { kind: 'cable', from: [172, 50], to: [128, 55] }],
+    end: {
+      armFar: [[97, 58], [110, 68], [112, 58]],
+      armNear: [[97, 58], [110, 46], [112, 54]],
+      props: [null, [112, 56]],
+    },
   },
   curl: {
     head: [100, 32],
@@ -173,6 +247,11 @@ export const POSES = {
       { kind: 'dumbbell', at: [123, 86], angle: 90 },
       { kind: 'dumbbell', at: [120, 60], angle: 15 },
     ],
+    end: {
+      armFar: [[103, 47], [107, 68], [110, 62]],
+      armNear: [[97, 47], [93, 66], [91, 84]],
+      propsFront: [[116, 60], [97, 86]],
+    },
   },
   'curl-hammer': {
     head: [100, 32],
@@ -186,6 +265,11 @@ export const POSES = {
       { kind: 'dumbbell', at: [123, 86], angle: 90 },
       { kind: 'dumbbell', at: [120, 60], angle: 90 },
     ],
+    end: {
+      armFar: [[103, 47], [107, 68], [110, 62]],
+      armNear: [[97, 47], [93, 66], [91, 84]],
+      propsFront: [[116, 60], [97, 86]],
+    },
   },
   triceps: {
     head: [92, 44],
@@ -200,6 +284,11 @@ export const POSES = {
       { kind: 'cable', from: [118, 20], to: [118, 74], tower: false },
       { kind: 'arrow', from: [136, 58], to: [136, 82] },
     ],
+    end: {
+      armFar: [[97, 58], [108, 66], [112, 54]],
+      armNear: [[97, 58], [110, 64], [114, 54]],
+      props: [null, null, [114, 56], null],
+    },
   },
 
   // --- Pierna ---------------------------------------------------------------
@@ -212,6 +301,16 @@ export const POSES = {
     legNear: [[94, 86], [116, 102], [106, 124]],
     props: [GROUND],
     propsFront: [{ kind: 'barbell', at: [103, 55], width: 58 }],
+    tempo: 3,
+    end: {
+      head: [104, 32],
+      spine: [[102, 44], [98, 80]],
+      armFar: [[101, 45], [112, 54], [126, 47]],
+      armNear: [[101, 45], [92, 54], [80, 47]],
+      legFar: [[98, 80], [100, 102], [102, 124]],
+      legNear: [[98, 80], [104, 102], [106, 124]],
+      propsFront: [[101, 45]],
+    },
   },
   deadlift: {
     head: [120, 52],
@@ -222,6 +321,16 @@ export const POSES = {
     legNear: [[86, 80], [98, 100], [96, 124]],
     props: [GROUND],
     propsFront: [{ kind: 'barbell', at: [111, 106], width: 60 }],
+    tempo: 3,
+    end: {
+      head: [110, 36],
+      spine: [[106, 48], [96, 80]],
+      armFar: [[104, 50], [103, 74], [102, 98]],
+      armNear: [[104, 50], [106, 74], [107, 98]],
+      legFar: [[96, 80], [98, 102], [96, 124]],
+      legNear: [[96, 80], [102, 102], [100, 124]],
+      propsFront: [[104, 102]],
+    },
   },
   rdl: {
     head: [126, 56],
@@ -232,6 +341,16 @@ export const POSES = {
     legNear: [[88, 80], [97, 102], [95, 124]],
     props: [GROUND, { kind: 'arrow', from: [70, 74], to: [56, 74] }],
     propsFront: [{ kind: 'barbell', at: [117, 100], width: 56 }],
+    tempo: 3,
+    end: {
+      head: [110, 34],
+      spine: [[106, 46], [96, 78]],
+      armFar: [[104, 48], [103, 72], [102, 92]],
+      armNear: [[104, 48], [106, 72], [107, 92]],
+      legFar: [[96, 78], [98, 102], [96, 124]],
+      legNear: [[96, 78], [102, 102], [100, 124]],
+      propsFront: [[104, 96]],
+    },
   },
   'split-squat': {
     head: [116, 42],
@@ -245,6 +364,15 @@ export const POSES = {
       { kind: 'dumbbell', at: [102, 86], angle: 90 },
       { kind: 'dumbbell', at: [120, 86], angle: 90 },
     ],
+    end: {
+      head: [116, 32],
+      spine: [[113, 44], [108, 76]],
+      armFar: [[112, 46], [118, 60], [120, 74]],
+      armNear: [[112, 46], [104, 60], [102, 74]],
+      legFar: [[108, 76], [92, 100], [72, 102]],
+      legNear: [[108, 76], [126, 100], [126, 124]],
+      propsFront: [[102, 76], [120, 76]],
+    },
   },
   'hip-thrust': {
     head: [54, 80],
@@ -255,6 +383,12 @@ export const POSES = {
     legNear: [[104, 88], [126, 104], [124, 124]],
     props: [GROUND, { kind: 'bench', at: [64, 90], width: 46 }],
     propsFront: [{ kind: 'barbell', at: [104, 80], width: 44 }],
+    end: {
+      spine: [[64, 86], [104, 104]],
+      legFar: [[104, 104], [122, 110], [120, 124]],
+      legNear: [[104, 104], [126, 110], [124, 124]],
+      propsFront: [[104, 96]],
+    },
   },
   'calf-raise': {
     head: [100, 30],
@@ -264,6 +398,15 @@ export const POSES = {
     legFar: [[100, 80], [96, 96], [97, 112], [108, 121]],
     legNear: [[100, 80], [104, 96], [105, 112], [116, 121]],
     props: [GROUND, { kind: 'arrow', from: [136, 108], to: [136, 84] }],
+    tempo: 2,
+    end: {
+      head: [100, 40],
+      spine: [[100, 52], [100, 90]],
+      armFar: [[103, 55], [111, 72], [113, 88]],
+      armNear: [[97, 55], [89, 72], [87, 88]],
+      legFar: [[100, 90], [96, 104], [97, 120], [110, 122]],
+      legNear: [[100, 90], [104, 104], [105, 120], [118, 122]],
+    },
   },
   nordic: {
     head: [152, 66],
@@ -273,6 +416,13 @@ export const POSES = {
     legFar: [[104, 98], [99, 117], [72, 121]],
     legNear: [[104, 98], [102, 118], [75, 122]],
     props: [GROUND, { kind: 'box', at: [58, 114], width: 30, height: 12 }],
+    tempo: 3.4,
+    end: {
+      head: [122, 44],
+      spine: [[116, 52], [104, 98]],
+      armFar: [[114, 56], [124, 68], [132, 78]],
+      armNear: [[114, 56], [126, 66], [134, 74]],
+    },
   },
 
   // --- Core -----------------------------------------------------------------
@@ -293,6 +443,12 @@ export const POSES = {
     legFar: [[110, 106], [134, 104], [158, 100]],
     legNear: [[110, 106], [124, 82], [142, 80]],
     props: [{ kind: 'ground', y: 114, from: 40, to: 172 }],
+    end: {
+      armFar: [[76, 102], [73, 82], [71, 64]],
+      armNear: [[76, 102], [88, 107], [100, 109]],
+      legFar: [[110, 106], [124, 82], [142, 80]],
+      legNear: [[110, 106], [134, 104], [158, 100]],
+    },
   },
   'side-plank': {
     head: [46, 88],
@@ -311,6 +467,11 @@ export const POSES = {
     legFar: [[102, 88], [94, 106], [92, 124]],
     legNear: [[102, 88], [110, 106], [108, 124]],
     props: [GROUND, { kind: 'cable', from: [170, 60], to: [122, 64] }],
+    end: {
+      armFar: [[101, 57], [108, 64], [110, 66]],
+      armNear: [[101, 57], [108, 60], [110, 64]],
+      props: [null, [110, 64]],
+    },
   },
 
   // --- Salto y velocidad ----------------------------------------------------
@@ -326,6 +487,15 @@ export const POSES = {
       { kind: 'box', at: [146, 96], width: 46, height: 30 },
       { kind: 'arrow', from: [86, 100], to: [128, 66] },
     ],
+    tempo: 2,
+    end: {
+      head: [96, 60],
+      spine: [[97, 72], [96, 96]],
+      armFar: [[97, 74], [86, 84], [76, 80]],
+      armNear: [[97, 74], [84, 80], [74, 74]],
+      legFar: [[96, 96], [110, 110], [100, 124]],
+      legNear: [[96, 96], [113, 110], [103, 124]],
+    },
   },
   cmj: {
     head: [100, 38],
@@ -335,6 +505,15 @@ export const POSES = {
     legFar: [[100, 80], [98, 98], [94, 112]],
     legNear: [[100, 80], [104, 98], [100, 112]],
     props: [GROUND, { kind: 'arrow', from: [136, 118], to: [136, 62] }],
+    tempo: 1.8,
+    end: {
+      head: [100, 58],
+      spine: [[100, 70], [100, 94]],
+      armFar: [[102, 72], [112, 80], [118, 72]],
+      armNear: [[98, 72], [88, 80], [82, 72]],
+      legFar: [[100, 94], [110, 108], [100, 124]],
+      legNear: [[100, 94], [113, 108], [103, 124]],
+    },
   },
   'broad-jump': {
     head: [120, 50],
@@ -344,6 +523,15 @@ export const POSES = {
     legFar: [[80, 72], [62, 90], [72, 104]],
     legNear: [[80, 72], [64, 88], [74, 102]],
     props: [GROUND, { kind: 'arrow', from: [46, 114], to: [150, 114] }],
+    tempo: 2,
+    end: {
+      head: [140, 64],
+      spine: [[132, 72], [104, 86]],
+      armFar: [[130, 74], [118, 86], [108, 80]],
+      armNear: [[130, 74], [116, 82], [104, 74]],
+      legFar: [[104, 86], [112, 104], [104, 124]],
+      legNear: [[104, 86], [115, 104], [107, 124]],
+    },
   },
   'depth-jump': {
     head: [110, 50],
@@ -357,6 +545,15 @@ export const POSES = {
       { kind: 'box', at: [52, 96], width: 40, height: 30 },
       { kind: 'arrow', from: [74, 84], to: [104, 112] },
     ],
+    tempo: 1.8,
+    end: {
+      head: [110, 62],
+      spine: [[108, 74], [104, 98]],
+      armFar: [[106, 76], [114, 88], [118, 98]],
+      armNear: [[106, 76], [98, 88], [94, 98]],
+      legFar: [[104, 98], [114, 110], [106, 124]],
+      legNear: [[104, 98], [118, 110], [110, 124]],
+    },
   },
   pogo: {
     head: [100, 40],
@@ -370,6 +567,15 @@ export const POSES = {
       { kind: 'arrow', from: [132, 112], to: [132, 90] },
       { kind: 'arrow', from: [68, 112], to: [68, 90] },
     ],
+    tempo: 0.9,
+    end: {
+      head: [100, 52],
+      spine: [[100, 64], [100, 96]],
+      armFar: [[103, 67], [113, 78], [109, 92]],
+      armNear: [[97, 67], [87, 78], [91, 92]],
+      legFar: [[100, 96], [96, 110], [94, 124]],
+      legNear: [[100, 96], [104, 110], [106, 124]],
+    },
   },
   sprint: {
     head: [120, 42],
@@ -379,6 +585,13 @@ export const POSES = {
     legFar: [[92, 80], [72, 92], [62, 82]],
     legNear: [[92, 80], [114, 92], [120, 110]],
     props: [GROUND, { kind: 'arrow', from: [40, 114], to: [86, 114] }],
+    tempo: 1.1,
+    end: {
+      armFar: [[111, 54], [124, 62], [130, 48]],
+      armNear: [[111, 54], [96, 64], [88, 76]],
+      legFar: [[92, 80], [114, 92], [120, 110]],
+      legNear: [[92, 80], [72, 92], [62, 82]],
+    },
   },
   cod: {
     head: [92, 48],
@@ -393,6 +606,15 @@ export const POSES = {
       { kind: 'cone', at: [166, 124] },
       { kind: 'arrow', from: [128, 52], to: [70, 46] },
     ],
+    tempo: 1.4,
+    end: {
+      head: [98, 44],
+      spine: [[101, 54], [108, 84]],
+      armFar: [[103, 56], [114, 64], [124, 58]],
+      armNear: [[103, 56], [90, 62], [78, 56]],
+      legFar: [[108, 84], [104, 100], [94, 112]],
+      legNear: [[108, 84], [124, 98], [118, 120]],
+    },
   },
 
   // --- Movilidad, prevención y rehabilitación -------------------------------
@@ -404,6 +626,15 @@ export const POSES = {
     legFar: [[104, 92], [84, 119], [60, 123]],
     legNear: [[104, 92], [128, 102], [126, 124]],
     props: [GROUND, { kind: 'arrow', from: [86, 70], to: [112, 70] }],
+    tempo: 3,
+    end: {
+      head: [114, 54],
+      spine: [[112, 66], [108, 98]],
+      armFar: [[110, 68], [103, 84], [108, 100]],
+      armNear: [[110, 68], [118, 86], [128, 104]],
+      legFar: [[108, 98], [88, 121], [64, 124]],
+      legNear: [[108, 98], [128, 106], [126, 124]],
+    },
   },
   'mobility-thoracic': {
     head: [100, 34],
@@ -413,6 +644,11 @@ export const POSES = {
     legFar: [[100, 84], [96, 104], [94, 124]],
     legNear: [[100, 84], [104, 104], [102, 124]],
     props: [GROUND, { kind: 'arrow', from: [136, 52], to: [72, 44] }],
+    tempo: 3,
+    end: {
+      armFar: [[103, 50], [90, 58], [104, 64]],
+      armNear: [[97, 50], [110, 58], [96, 66]],
+    },
   },
   'mobility-ankle': {
     head: [94, 52],
@@ -426,6 +662,12 @@ export const POSES = {
       { kind: 'line', from: [152, 26], to: [152, 124] },
       { kind: 'arrow', from: [134, 100], to: [148, 100] },
     ],
+    tempo: 2.6,
+    end: {
+      armFar: [[99, 66], [110, 76], [124, 70]],
+      armNear: [[99, 66], [112, 72], [126, 66]],
+      legNear: [[100, 92], [116, 106], [124, 124]],
+    },
   },
   'band-walk': {
     head: [100, 44],
@@ -436,6 +678,11 @@ export const POSES = {
     legNear: [[100, 84], [120, 102], [128, 120]],
     props: [GROUND, { kind: 'arrow', from: [140, 110], to: [166, 110] }],
     propsFront: [{ kind: 'band', from: [74, 118], to: [128, 118] }],
+    tempo: 2,
+    end: {
+      legNear: [[100, 84], [110, 102], [112, 120]],
+      propsFront: [[112, 120]],
+    },
   },
   balance: {
     head: [100, 34],
@@ -445,6 +692,12 @@ export const POSES = {
     legFar: [[100, 84], [84, 96], [88, 112]],
     legNear: [[100, 84], [102, 104], [100, 120]],
     props: [GROUND, { kind: 'box', at: [100, 120], width: 34, height: 5 }],
+    tempo: 3.4,
+    end: {
+      armFar: [[103, 49], [118, 45], [132, 50]],
+      armNear: [[97, 49], [82, 56], [68, 64]],
+      legFar: [[100, 84], [86, 98], [92, 114]],
+    },
   },
 
   // --- Cardio ---------------------------------------------------------------
@@ -456,6 +709,13 @@ export const POSES = {
     legFar: [[96, 82], [80, 96], [70, 108]],
     legNear: [[96, 82], [112, 96], [114, 116]],
     props: [GROUND],
+    tempo: 1.3,
+    end: {
+      armFar: [[108, 56], [118, 68], [124, 58]],
+      armNear: [[108, 56], [98, 68], [92, 78]],
+      legFar: [[96, 82], [112, 96], [114, 116]],
+      legNear: [[96, 82], [80, 96], [70, 108]],
+    },
   },
   intervals: {
     head: [116, 44],
@@ -469,6 +729,13 @@ export const POSES = {
       { kind: 'arrow', from: [34, 108], to: [74, 108] },
       { kind: 'arrow', from: [34, 120], to: [56, 120] },
     ],
+    tempo: 0.9,
+    end: {
+      armFar: [[108, 56], [118, 68], [124, 58]],
+      armNear: [[108, 56], [98, 68], [92, 78]],
+      legFar: [[96, 82], [112, 96], [114, 116]],
+      legNear: [[96, 82], [80, 96], [70, 108]],
+    },
   },
   bike: {
     head: [112, 52],
@@ -488,6 +755,11 @@ export const POSES = {
       { kind: 'bench', at: [98, 88], width: 24 },
       { kind: 'wheel', at: [104, 106], r: 8 },
     ],
+    tempo: 1.2,
+    end: {
+      legFar: [[104, 88], [118, 100], [108, 108]],
+      legNear: [[104, 88], [114, 98], [104, 106]],
+    },
   },
   erg: {
     head: [124, 64],
@@ -503,6 +775,16 @@ export const POSES = {
       { kind: 'bench', at: [112, 104], width: 22 },
       { kind: 'cable', from: [52, 96], to: [96, 89], tower: false },
     ],
+    tempo: 2.2,
+    end: {
+      head: [116, 72],
+      spine: [[112, 80], [104, 100]],
+      armFar: [[110, 82], [92, 92], [72, 100]],
+      armNear: [[110, 82], [93, 94], [73, 102]],
+      legFar: [[104, 100], [80, 96], [66, 110]],
+      legNear: [[104, 100], [82, 98], [68, 112]],
+      props: [null, null, null, null, [72, 100]],
+    },
   },
 
   // --- Calistenia -----------------------------------------------------------
@@ -515,6 +797,15 @@ export const POSES = {
     legNear: [[100, 78], [107, 94], [95, 103]],
     props: [{ kind: 'rig', at: [100, 52], width: 78, drop: 22 }],
     propsFront: [{ kind: 'arrow', from: [146, 78], to: [146, 50] }],
+    tempo: 2.4,
+    end: {
+      head: [100, 62],
+      spine: [[100, 74], [100, 106]],
+      armFar: [[102, 76], [110, 64], [114, 52]],
+      armNear: [[98, 76], [90, 64], [86, 52]],
+      legFar: [[100, 106], [104, 120], [92, 128]],
+      legNear: [[100, 106], [107, 120], [95, 129]],
+    },
   },
   'inverted-row': {
     head: [154, 88],
@@ -528,6 +819,14 @@ export const POSES = {
       { kind: 'rig', at: [100, 70], width: 96, drop: 26 },
       { kind: 'arrow', from: [162, 108], to: [162, 92] },
     ],
+    end: {
+      head: [154, 100],
+      spine: [[144, 102], [88, 110]],
+      armFar: [[140, 104], [126, 90], [112, 72]],
+      armNear: [[140, 104], [124, 88], [110, 70]],
+      legFar: [[88, 110], [66, 114], [44, 120]],
+      legNear: [[88, 110], [68, 115], [46, 121]],
+    },
   },
   'pike-pushup': {
     head: [120, 98],
@@ -537,6 +836,12 @@ export const POSES = {
     legFar: [[84, 64], [68, 92], [56, 120]],
     legNear: [[84, 64], [70, 92], [58, 121]],
     props: [GROUND],
+    end: {
+      head: [124, 110],
+      spine: [[116, 102], [84, 66]],
+      armFar: [[112, 100], [108, 110], [122, 121]],
+      armNear: [[112, 100], [112, 111], [126, 122]],
+    },
   },
   'decline-pushup': {
     head: [152, 86],
@@ -546,6 +851,14 @@ export const POSES = {
     legFar: [[86, 80], [76, 84], [66, 87]],
     legNear: [[86, 80], [77, 85], [67, 88]],
     props: [GROUND, { kind: 'box', at: [44, 88], width: 46, height: 38 }],
+    end: {
+      head: [152, 98],
+      spine: [[142, 102], [86, 90]],
+      armFar: [[138, 104], [124, 112], [134, 122]],
+      armNear: [[138, 104], [128, 113], [140, 122]],
+      legFar: [[86, 90], [76, 89], [66, 87]],
+      legNear: [[86, 90], [77, 89], [67, 88]],
+    },
   },
   'bench-dip': {
     head: [96, 58],
@@ -555,6 +868,14 @@ export const POSES = {
     legFar: [[90, 96], [122, 100], [132, 122]],
     legNear: [[90, 96], [124, 101], [134, 123]],
     props: [GROUND, { kind: 'bench', at: [60, 90], width: 54 }],
+    end: {
+      head: [96, 72],
+      spine: [[94, 84], [90, 104]],
+      armFar: [[92, 86], [74, 96], [70, 89]],
+      armNear: [[92, 86], [72, 98], [68, 90]],
+      legFar: [[90, 104], [122, 106], [132, 122]],
+      legNear: [[90, 104], [124, 107], [134, 123]],
+    },
   },
   handstand: {
     head: [100, 110],
@@ -573,6 +894,15 @@ export const POSES = {
     legFar: [[100, 58], [94, 40], [93, 22]],
     legNear: [[100, 58], [106, 40], [107, 22]],
     props: [GROUND, { kind: 'arrow', from: [144, 104], to: [144, 74] }],
+    tempo: 2.4,
+    end: {
+      head: [100, 96],
+      spine: [[100, 84], [100, 44]],
+      armFar: [[103, 83], [108, 102], [111, 122]],
+      armNear: [[97, 83], [92, 102], [89, 122]],
+      legFar: [[100, 44], [94, 28], [93, 14]],
+      legNear: [[100, 44], [106, 28], [107, 14]],
+    },
   },
   'l-sit': {
     head: [86, 44],
@@ -622,6 +952,15 @@ export const POSES = {
     legFar: [[96, 92], [130, 92], [162, 92]],
     legNear: [[96, 92], [116, 104], [108, 124]],
     props: [GROUND],
+    tempo: 3,
+    end: {
+      head: [96, 32],
+      spine: [[98, 44], [100, 80]],
+      armFar: [[100, 46], [112, 54], [126, 58]],
+      armNear: [[100, 46], [112, 50], [126, 54]],
+      legFar: [[100, 80], [130, 80], [162, 80]],
+      legNear: [[100, 80], [102, 102], [100, 124]],
+    },
   },
   lunge: {
     head: [106, 42],
@@ -631,6 +970,14 @@ export const POSES = {
     legFar: [[98, 86], [76, 112], [56, 124]],
     legNear: [[98, 86], [128, 102], [126, 124]],
     props: [GROUND],
+    end: {
+      head: [106, 32],
+      spine: [[103, 44], [98, 76]],
+      armFar: [[101, 46], [108, 60], [110, 74]],
+      armNear: [[101, 46], [94, 60], [92, 74]],
+      legFar: [[98, 76], [78, 102], [56, 120]],
+      legNear: [[98, 76], [124, 100], [126, 124]],
+    },
   },
   'hanging-leg-raise': {
     head: [100, 48],
@@ -641,6 +988,10 @@ export const POSES = {
     legNear: [[100, 88], [125, 85], [150, 83]],
     props: [{ kind: 'rig', at: [100, 26], width: 72, drop: 14 }],
     propsFront: [{ kind: 'arrow', from: [150, 108], to: [150, 86] }],
+    end: {
+      legFar: [[100, 88], [102, 108], [100, 128]],
+      legNear: [[100, 88], [105, 108], [103, 129]],
+    },
   },
   hollow: {
     head: [66, 84],
@@ -668,6 +1019,11 @@ export const POSES = {
     legFar: [[100, 88], [120, 98], [118, 122]],
     legNear: [[100, 88], [123, 99], [121, 123]],
     props: [GROUND, { kind: 'arrow', from: [100, 112], to: [100, 82] }],
+    end: {
+      spine: [[58, 104], [100, 106]],
+      legFar: [[100, 106], [120, 110], [118, 122]],
+      legNear: [[100, 106], [123, 111], [121, 123]],
+    },
   },
   burpee: {
     head: [112, 66],
@@ -677,6 +1033,15 @@ export const POSES = {
     legFar: [[96, 98], [110, 110], [102, 122]],
     legNear: [[96, 98], [113, 111], [105, 123]],
     props: [GROUND, { kind: 'arrow', from: [146, 112], to: [146, 62] }],
+    tempo: 1.8,
+    end: {
+      head: [100, 32],
+      spine: [[100, 44], [100, 80]],
+      armFar: [[102, 46], [112, 32], [114, 20]],
+      armNear: [[98, 46], [88, 32], [86, 20]],
+      legFar: [[100, 80], [98, 98], [96, 112]],
+      legNear: [[100, 80], [103, 98], [101, 112]],
+    },
   },
   'mountain-climber': {
     head: [154, 84],
@@ -686,6 +1051,11 @@ export const POSES = {
     legFar: [[88, 98], [62, 106], [36, 116]],
     legNear: [[88, 98], [112, 86], [100, 100]],
     props: [GROUND, { kind: 'arrow', from: [98, 118], to: [124, 110] }],
+    tempo: 0.8,
+    end: {
+      legFar: [[88, 98], [112, 86], [100, 100]],
+      legNear: [[88, 98], [62, 106], [36, 116]],
+    },
   },
   'jump-squat': {
     head: [100, 42],
@@ -695,6 +1065,15 @@ export const POSES = {
     legFar: [[96, 84], [113, 97], [103, 109]],
     legNear: [[96, 84], [116, 98], [106, 110]],
     props: [GROUND, { kind: 'arrow', from: [146, 116], to: [146, 66] }],
+    tempo: 1.6,
+    end: {
+      head: [100, 58],
+      spine: [[100, 70], [96, 96]],
+      armFar: [[102, 72], [112, 84], [118, 76]],
+      armNear: [[98, 72], [88, 84], [82, 76]],
+      legFar: [[96, 96], [112, 108], [102, 124]],
+      legNear: [[96, 96], [116, 109], [106, 125]],
+    },
   },
   'step-up': {
     head: [104, 46],
@@ -704,6 +1083,14 @@ export const POSES = {
     legFar: [[98, 90], [92, 106], [90, 124]],
     legNear: [[98, 90], [124, 84], [128, 90]],
     props: [GROUND, { kind: 'box', at: [146, 90], width: 48, height: 36 }],
+    end: {
+      head: [122, 34],
+      spine: [[120, 46], [116, 78]],
+      armFar: [[118, 48], [124, 62], [126, 76]],
+      armNear: [[118, 48], [112, 62], [114, 76]],
+      legFar: [[116, 78], [110, 90], [106, 102]],
+      legNear: [[116, 78], [124, 84], [128, 90]],
+    },
   },
   'ab-wheel': {
     head: [122, 80],
@@ -713,6 +1100,14 @@ export const POSES = {
     legFar: [[78, 104], [66, 119], [44, 122]],
     legNear: [[78, 104], [68, 120], [46, 123]],
     props: [GROUND, { kind: 'wheel', at: [156, 112], r: 13 }],
+    tempo: 3,
+    end: {
+      head: [104, 74],
+      spine: [[96, 82], [76, 102]],
+      armFar: [[94, 84], [104, 94], [114, 104]],
+      armNear: [[94, 84], [105, 95], [116, 105]],
+      props: [null, [122, 112]],
+    },
   },
 
   // --- Máquinas de gimnasio -------------------------------------------------
@@ -745,6 +1140,11 @@ export const POSES = {
       { kind: 'box', at: [50, 72], width: 16, height: 12 },
       { kind: 'arrow', from: [44, 96], to: [44, 74] },
     ],
+    end: {
+      legFar: [[102, 94], [72, 97], [76, 120]],
+      legNear: [[102, 94], [71, 99], [75, 122]],
+      props: [null, null, [72, 110], null],
+    },
   },
   'leg-curl': {
     head: [48, 86],
@@ -759,6 +1159,11 @@ export const POSES = {
       { kind: 'box', at: [138, 62], width: 18, height: 10 },
       { kind: 'arrow', from: [160, 92], to: [160, 70] },
     ],
+    end: {
+      legFar: [[110, 92], [132, 94], [152, 98]],
+      legNear: [[110, 92], [133, 96], [154, 100]],
+      props: [null, [150, 90], null],
+    },
   },
   'seated-row': {
     head: [64, 58],
@@ -774,6 +1179,11 @@ export const POSES = {
       { kind: 'cable', from: [156, 88], to: [118, 85], tower: false },
       { kind: 'arrow', from: [130, 66], to: [96, 66] },
     ],
+    end: {
+      armFar: [[70, 72], [86, 84], [92, 88]],
+      armNear: [[70, 72], [88, 80], [94, 86]],
+      props: [null, null, [94, 87], null],
+    },
   },
   'chest-press-machine': {
     head: [76, 48],
@@ -790,6 +1200,11 @@ export const POSES = {
       { kind: 'arrow', from: [110, 42], to: [136, 42] },
     ],
     propsFront: [{ kind: 'dumbbell', at: [124, 62], angle: 90 }],
+    end: {
+      armFar: [[76, 62], [92, 74], [102, 66]],
+      armNear: [[76, 62], [94, 70], [104, 62]],
+      propsFront: [[106, 64]],
+    },
   },
   'pec-deck': {
     head: [76, 48],
@@ -805,6 +1220,10 @@ export const POSES = {
       { kind: 'arrow', from: [156, 42], to: [136, 56] },
       { kind: 'arrow', from: [156, 86], to: [136, 72] },
     ],
+    end: {
+      armFar: [[78, 66], [104, 72], [118, 66]],
+      armNear: [[78, 62], [104, 60], [118, 62]],
+    },
   },
   'cable-crossover': {
     head: [100, 38],
@@ -818,6 +1237,11 @@ export const POSES = {
       { kind: 'cable', from: [22, 30], to: [90, 74] },
       { kind: 'cable', from: [178, 30], to: [110, 74] },
     ],
+    end: {
+      armFar: [[103, 53], [104, 68], [100, 84]],
+      armNear: [[97, 53], [96, 68], [100, 84]],
+      props: [[100, 84], [100, 84]],
+    },
   },
   'reverse-fly': {
     head: [126, 60],
@@ -831,6 +1255,11 @@ export const POSES = {
       { kind: 'dumbbell', at: [150, 64], angle: 90 },
       { kind: 'dumbbell', at: [148, 78], angle: 90 },
     ],
+    end: {
+      armFar: [[116, 70], [116, 86], [114, 98]],
+      armNear: [[116, 68], [118, 84], [116, 96]],
+      propsFront: [[118, 98], [116, 100]],
+    },
   },
   shrug: {
     head: [100, 32],
@@ -848,6 +1277,14 @@ export const POSES = {
       { kind: 'dumbbell', at: [86, 86], angle: 90 },
       { kind: 'dumbbell', at: [114, 86], angle: 90 },
     ],
+    tempo: 1.6,
+    end: {
+      head: [100, 36],
+      spine: [[100, 48], [100, 84]],
+      armFar: [[105, 50], [110, 66], [112, 86]],
+      armNear: [[95, 50], [90, 66], [88, 86]],
+      propsFront: [[86, 88], [114, 88]],
+    },
   },
   'preacher-curl': {
     head: [70, 52],
@@ -863,6 +1300,11 @@ export const POSES = {
       { kind: 'bench', at: [66, 94], width: 26 },
     ],
     propsFront: [{ kind: 'barbell', at: [116, 72], width: 34 }],
+    end: {
+      armFar: [[76, 66], [97, 88], [116, 96]],
+      armNear: [[76, 66], [98, 87], [118, 94]],
+      propsFront: [[120, 94]],
+    },
   },
   'skull-crusher': {
     head: [64, 82],
@@ -873,6 +1315,11 @@ export const POSES = {
     legNear: [[118, 88], [135, 105], [133, 125]],
     props: [GROUND, { kind: 'bench', at: [100, 92], width: 96 }],
     propsFront: [{ kind: 'barbell', at: [68, 58], width: 40 }],
+    end: {
+      armFar: [[82, 86], [80, 64], [80, 52]],
+      armNear: [[82, 86], [80, 63], [80, 50]],
+      propsFront: [[80, 48]],
+    },
   },
   abductor: {
     head: [124, 56],
@@ -888,20 +1335,30 @@ export const POSES = {
       { kind: 'box', at: [64, 92], width: 14, height: 18 },
       { kind: 'arrow', from: [56, 96], to: [34, 96] },
     ],
+    end: {
+      legFar: [[106, 98], [88, 100], [86, 122]],
+      legNear: [[106, 98], [90, 102], [88, 124]],
+      props: [null, null, [78, 92], null],
+    },
   },
   'seated-calf': {
     head: [80, 58],
     spine: [[80, 70], [86, 94]],
     armFar: [[82, 72], [96, 82], [108, 84]],
     armNear: [[82, 72], [98, 80], [110, 82]],
-    legFar: [[86, 94], [116, 96], [118, 110], [130, 117]],
-    legNear: [[86, 94], [118, 97], [120, 111], [132, 118]],
+    legFar: [[86, 94], [116, 96], [118, 104], [132, 110]],
+    legNear: [[86, 94], [118, 97], [120, 105], [134, 111]],
     props: [
       GROUND,
       { kind: 'bench', at: [80, 98], width: 40 },
       { kind: 'box', at: [112, 84], width: 24, height: 10 },
       { kind: 'arrow', from: [152, 108], to: [152, 88] },
     ],
+    tempo: 2,
+    end: {
+      legFar: [[86, 94], [116, 96], [118, 118], [128, 123]],
+      legNear: [[86, 94], [118, 97], [120, 119], [130, 124]],
+    },
   },
   'front-squat': {
     head: [100, 40],
@@ -912,6 +1369,16 @@ export const POSES = {
     legNear: [[96, 86], [118, 103], [108, 125]],
     props: [GROUND],
     propsFront: [{ kind: 'barbell', at: [112, 52], width: 52 }],
+    tempo: 3,
+    end: {
+      head: [100, 30],
+      spine: [[100, 42], [98, 80]],
+      armFar: [[100, 45], [112, 52], [114, 42]],
+      armNear: [[100, 45], [110, 54], [112, 44]],
+      legFar: [[98, 80], [100, 102], [102, 124]],
+      legNear: [[98, 80], [104, 102], [106, 125]],
+      propsFront: [[114, 42]],
+    },
   },
   'goblet-squat': {
     head: [100, 40],
@@ -922,6 +1389,16 @@ export const POSES = {
     legNear: [[96, 86], [118, 103], [108, 125]],
     props: [GROUND],
     propsFront: [{ kind: 'dumbbell', at: [106, 62], angle: 90 }],
+    tempo: 3,
+    end: {
+      head: [100, 30],
+      spine: [[100, 42], [98, 80]],
+      armFar: [[102, 46], [112, 56], [106, 54]],
+      armNear: [[98, 46], [90, 56], [102, 52]],
+      legFar: [[98, 80], [100, 102], [102, 124]],
+      legNear: [[98, 80], [104, 102], [106, 125]],
+      propsFront: [[106, 52]],
+    },
   },
   'upright-row': {
     head: [100, 32],
@@ -932,6 +1409,11 @@ export const POSES = {
     legNear: [[100, 84], [104, 104], [102, 124]],
     props: [GROUND, { kind: 'arrow', from: [140, 86], to: [140, 62] }],
     propsFront: [{ kind: 'barbell', at: [100, 62], width: 42 }],
+    end: {
+      armFar: [[103, 47], [108, 66], [110, 84]],
+      armNear: [[97, 47], [92, 66], [90, 84]],
+      propsFront: [[100, 86]],
+    },
   },
   'good-morning': {
     head: [130, 58],
@@ -942,6 +1424,16 @@ export const POSES = {
     legNear: [[88, 80], [96, 102], [94, 124]],
     props: [GROUND, { kind: 'arrow', from: [70, 74], to: [56, 74] }],
     propsFront: [{ kind: 'barbell', at: [119, 62], width: 52 }],
+    tempo: 3,
+    end: {
+      head: [112, 38],
+      spine: [[108, 50], [96, 80]],
+      armFar: [[106, 52], [98, 60], [88, 54]],
+      armNear: [[106, 51], [97, 58], [86, 52]],
+      legFar: [[96, 80], [98, 102], [96, 124]],
+      legNear: [[96, 80], [102, 102], [100, 124]],
+      propsFront: [[106, 52]],
+    },
   },
   pullover: {
     head: [62, 82],
@@ -952,6 +1444,11 @@ export const POSES = {
     legNear: [[118, 88], [135, 105], [133, 125]],
     props: [GROUND, { kind: 'bench', at: [100, 92], width: 90 }],
     propsFront: [{ kind: 'dumbbell', at: [46, 62], angle: 45 }],
+    end: {
+      armFar: [[80, 86], [80, 68], [86, 58]],
+      armNear: [[80, 86], [79, 67], [85, 56]],
+      propsFront: [[86, 54]],
+    },
   },
   'cable-crunch': {
     head: [106, 66],
@@ -966,6 +1463,13 @@ export const POSES = {
       { kind: 'cable', from: [100, 16], to: [100, 54], tower: false },
       { kind: 'arrow', from: [136, 62], to: [136, 92] },
     ],
+    end: {
+      head: [104, 52],
+      spine: [[102, 62], [96, 96]],
+      armFar: [[100, 62], [100, 54], [100, 46]],
+      armNear: [[100, 63], [101, 54], [101, 46]],
+      props: [null, [100, 46], null],
+    },
   },
 
   // --- Genérico -------------------------------------------------------------
@@ -981,6 +1485,11 @@ export const POSES = {
       { kind: 'dumbbell', at: [84, 84], angle: 90 },
       { kind: 'dumbbell', at: [116, 84], angle: 90 },
     ],
+    end: {
+      armFar: [[103, 47], [110, 66], [112, 60]],
+      armNear: [[97, 47], [90, 66], [88, 60]],
+      propsFront: [[86, 62], [114, 62]],
+    },
   },
 } as const satisfies Record<string, Pose>;
 
@@ -1082,6 +1591,40 @@ const POSE_BY_SLUG: Record<string, PoseKey> = {
   'buenos-dias': 'good-morning',
   'pull-over': 'pullover',
   'abdominales-polea': 'cable-crunch',
+  'press-banca-estrecho': 'bench-press',
+  'press-declinado': 'bench-press',
+  'aperturas-mancuernas': 'pec-deck',
+  'aperturas-polea': 'cable-crossover',
+  'press-inclinado-mancuernas': 'incline-press',
+  'curl-barra': 'curl',
+  'curl-barra-z': 'curl',
+  'curl-polea': 'curl',
+  'curl-concentrado': 'preacher-curl',
+  'patada-triceps': 'triceps',
+  'extension-triceps-sobrecabeza': 'skull-crusher',
+  'remo-en-t': 'row-barbell',
+  'remo-tumbado-banco': 'row-db',
+  'remo-agarre-inverso': 'row-barbell',
+  'jalon-agarre-estrecho': 'lat-pulldown',
+  'dominadas-asistidas': 'pullup',
+  hiperextensiones: 'good-morning',
+  'sentadilla-hack': 'leg-press',
+  'zancadas-caminando': 'lunge',
+  'encogimientos-barra': 'shrug',
+  'remo-menton-polea': 'upright-row',
+  'elevaciones-frontales': 'lateral-raise',
+  'elevaciones-laterales-polea': 'lateral-raise',
+  'press-arnold': 'overhead-press',
+  'press-militar-sentado': 'overhead-press',
+  'peso-muerto-sumo': 'deadlift',
+  'peso-muerto-rack': 'deadlift',
+  'swing-kettlebell': 'rdl',
+  'cargada-fuerza': 'deadlift',
+  'sentadilla-multipower': 'squat',
+  'sentadilla-sumo': 'squat',
+  'pullover-polea': 'pullover',
+  'fondos-maquina': 'dip',
+  'abdominales-maquina': 'cable-crunch',
 };
 
 /** Respaldo para los ejercicios que crea el entrenador, que no tienen slug. */

@@ -45,6 +45,28 @@ export type Prop =
   /** Flecha de dirección del movimiento. */
   | { kind: 'arrow'; from: Point; to: Point };
 
+/**
+ * El otro extremo del movimiento.
+ *
+ * Sólo hace falta declarar lo que se mueve: en un curl de bíceps cambia el
+ * brazo y la mancuerna, y nada más. Lo que se omite se queda quieto.
+ *
+ * Cada miembro debe tener el mismo número de puntos que en la postura de
+ * partida: la interpolación es punto a punto.
+ */
+export interface PoseFrame {
+  head?: Point;
+  spine?: Point[];
+  armFar?: Point[];
+  armNear?: Point[];
+  legFar?: Point[];
+  legNear?: Point[];
+  /** Nueva posición de cada elemento de `propsFront`, en su mismo orden. */
+  propsFront?: (Point | null)[];
+  /** Ídem para el material de fondo (poleas, gomas), en el orden de `props`. */
+  props?: (Point | null)[];
+}
+
 export interface Pose {
   /** Centro de la cabeza. */
   head: Point;
@@ -59,6 +81,10 @@ export interface Pose {
   /** Material. `front` lo dibuja por delante de la figura. */
   props?: Prop[];
   propsFront?: Prop[];
+  /** Fin del recorrido. Sin esto la figura no se anima. */
+  end?: PoseFrame;
+  /** Duración de un ciclo completo en segundos (2,6 por defecto). */
+  tempo?: number;
 }
 
 const NEAR = 'var(--color-ink-100)';
@@ -74,8 +100,33 @@ function path(points: Point[]): string {
   return points.map(([x, y], index) => `${index === 0 ? 'M' : 'L'}${x} ${y}`).join(' ');
 }
 
-function Limb({ points, color, width = LIMB }: { points: Point[]; color: string; width?: number }) {
+/*
+ * La animación se hace con SMIL (`<animate>`), no con CSS ni JavaScript: va
+ * dentro del propio SVG, no necesita hidratar nada y el navegador la interpola
+ * en el compositor. Un ciclo de ida y vuelta cuesta unos 400 bytes de marcado.
+ *
+ * `keySplines` da una curva suave en los extremos, que es como se mueve un
+ * cuerpo de verdad: frena al final del recorrido en vez de rebotar.
+ */
+const EASE = '0.42 0 0.58 1';
+
+function Limb({
+  points,
+  color,
+  width = LIMB,
+  to,
+  tempo,
+}: {
+  points: Point[];
+  color: string;
+  width?: number;
+  /** Mismo miembro al final del recorrido. Si falta, no se anima. */
+  to?: Point[];
+  tempo: number;
+}) {
   if (points.length < 2) return null;
+  // Sólo se interpola punto a punto: distinto número de puntos no es animable.
+  const animates = to && to.length === points.length;
   return (
     <path
       d={path(points)}
@@ -84,7 +135,19 @@ function Limb({ points, color, width = LIMB }: { points: Point[]; color: string;
       strokeWidth={width}
       strokeLinecap="round"
       strokeLinejoin="round"
-    />
+    >
+      {animates ? (
+        <animate
+          attributeName="d"
+          values={`${path(points)};${path(to)};${path(points)}`}
+          keyTimes="0;0.5;1"
+          calcMode="spline"
+          keySplines={`${EASE};${EASE}`}
+          dur={`${tempo}s`}
+          repeatCount="indefinite"
+        />
+      ) : null}
+    </path>
   );
 }
 
@@ -106,7 +169,7 @@ function bandPath([x1, y1]: Point, [x2, y2]: Point): string {
   return d;
 }
 
-function Gear({ prop }: { prop: Prop }): ReactNode {
+function Gear({ prop, pullTo, tempo }: { prop: Prop; pullTo?: Point; tempo?: number }): ReactNode {
   switch (prop.kind) {
     case 'ground': {
       const y = prop.y ?? 126;
@@ -176,18 +239,50 @@ function Gear({ prop }: { prop: Prop }): ReactNode {
     case 'cable': {
       const [x1, y1] = prop.from;
       const [x2, y2] = prop.to;
+      const cycle =
+        pullTo && tempo
+          ? {
+              keyTimes: '0;0.5;1',
+              calcMode: 'spline' as const,
+              keySplines: `${EASE};${EASE}`,
+              dur: `${tempo}s`,
+              repeatCount: 'indefinite' as const,
+            }
+          : null;
       return (
         <g>
           {prop.tower === false ? null : (
             <rect x={x1 - 9} y={y1 - 4} width={18} height={Math.max(10, 126 - y1)} rx={3} fill={FLOOR} />
           )}
-          <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={GEAR} strokeWidth={2.5} strokeLinecap="round" />
-          <circle cx={x2} cy={y2} r={4} fill={GEAR} />
+          <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={GEAR} strokeWidth={2.5} strokeLinecap="round">
+            {cycle ? <animate attributeName="x2" values={`${x2};${pullTo![0]};${x2}`} {...cycle} /> : null}
+            {cycle ? <animate attributeName="y2" values={`${y2};${pullTo![1]};${y2}`} {...cycle} /> : null}
+          </line>
+          <circle cx={x2} cy={y2} r={4} fill={GEAR}>
+            {cycle ? <animate attributeName="cx" values={`${x2};${pullTo![0]};${x2}`} {...cycle} /> : null}
+            {cycle ? <animate attributeName="cy" values={`${y2};${pullTo![1]};${y2}`} {...cycle} /> : null}
+          </circle>
         </g>
       );
     }
-    case 'band':
-      return <path d={bandPath(prop.from, prop.to)} fill="none" stroke={GEAR} strokeWidth={3} strokeLinecap="round" />;
+    case 'band': {
+      const stretched = pullTo ? bandPath(prop.from, pullTo) : null;
+      return (
+        <path d={bandPath(prop.from, prop.to)} fill="none" stroke={GEAR} strokeWidth={3} strokeLinecap="round">
+          {stretched && tempo ? (
+            <animate
+              attributeName="d"
+              values={`${bandPath(prop.from, prop.to)};${stretched};${bandPath(prop.from, prop.to)}`}
+              keyTimes="0;0.5;1"
+              calcMode="spline"
+              keySplines={`${EASE};${EASE}`}
+              dur={`${tempo}s`}
+              repeatCount="indefinite"
+            />
+          ) : null}
+        </path>
+      );
+    }
     case 'cone': {
       const [x, y] = prop.at;
       return <path d={`M${x} ${y - 14} L${x + 8} ${y} L${x - 8} ${y} Z`} fill={GEAR} />;
@@ -228,22 +323,117 @@ function Gear({ prop }: { prop: Prop }): ReactNode {
   }
 }
 
-/** Dibuja una postura completa. Sin estado ni identificadores: renderiza en servidor. */
-export function PoseDrawing({ pose }: { pose: Pose }) {
+/**
+ * Punto de anclaje de un elemento de material, para poder desplazarlo.
+ *
+ * `ground` también tiene `to`, pero es una coordenada suelta, no un punto: por
+ * eso se decide por el tipo y no por la presencia del campo.
+ */
+function anchorOf(prop: Prop): Point | null {
+  switch (prop.kind) {
+    case 'barbell':
+    case 'dumbbell':
+    case 'bench':
+    case 'box':
+    case 'rig':
+    case 'cone':
+    case 'wheel':
+      return prop.at;
+    case 'cable':
+    case 'band':
+      return prop.to;
+    default:
+      return null;
+  }
+}
+
+/**
+ * Material que acompaña al movimiento (la barra, la mancuerna, el agarre de la
+ * polea). Se mueve con un `translate` en lugar de redibujarlo: es un solo
+ * `<animateTransform>` para todo el conjunto de trazos que lo forman.
+ */
+function MovingGear({ prop, to, tempo }: { prop: Prop; to: Point | null; tempo: number }) {
+  const from = anchorOf(prop);
+  if (!to || !from) return <Gear prop={prop} />;
+
+  /*
+   * Un cable y una goma no se desplazan: se estiran. Su extremo fijo (la torre,
+   * el anclaje) se queda donde está y sólo se mueve el agarre, así que se
+   * animan los extremos del trazo en vez de trasladar el conjunto.
+   */
+  if (prop.kind === 'cable' || prop.kind === 'band') {
+    return <Gear prop={prop} pullTo={to} tempo={tempo} />;
+  }
+
+  const dx = Math.round((to[0] - from[0]) * 100) / 100;
+  const dy = Math.round((to[1] - from[1]) * 100) / 100;
+  if (dx === 0 && dy === 0) return <Gear prop={prop} />;
+  return (
+    <g>
+      <Gear prop={prop} />
+      <animateTransform
+        attributeName="transform"
+        type="translate"
+        values={`0 0;${dx} ${dy};0 0`}
+        keyTimes="0;0.5;1"
+        calcMode="spline"
+        keySplines={`${EASE};${EASE}`}
+        dur={`${tempo}s`}
+        repeatCount="indefinite"
+      />
+    </g>
+  );
+}
+
+/**
+ * Dibuja una postura completa.
+ *
+ * Sin estado ni identificadores generados: se renderiza en el servidor. Con
+ * `animated` y una postura que declare su `end`, la figura recorre el
+ * movimiento de ida y vuelta.
+ */
+export function PoseDrawing({ pose, animated = false }: { pose: Pose; animated?: boolean }) {
   const [hx, hy] = pose.head;
+  const end = animated ? pose.end : undefined;
+  const tempo = pose.tempo ?? 2.6;
+  const headTo = end?.head;
+
   return (
     <g>
       {pose.props?.map((prop, index) => (
-        <Gear key={`b${index}`} prop={prop} />
+        <MovingGear key={`b${index}`} prop={prop} to={end?.props?.[index] ?? null} tempo={tempo} />
       ))}
-      <Limb points={pose.armFar ?? []} color={FAR} />
-      <Limb points={pose.legFar ?? []} color={FAR} />
-      <Limb points={pose.spine} color={NEAR} width={TORSO} />
-      <circle cx={hx} cy={hy} r={9} fill={NEAR} />
-      <Limb points={pose.legNear ?? []} color={NEAR} />
-      <Limb points={pose.armNear ?? []} color={NEAR} />
+      <Limb points={pose.armFar ?? []} color={FAR} to={end?.armFar} tempo={tempo} />
+      <Limb points={pose.legFar ?? []} color={FAR} to={end?.legFar} tempo={tempo} />
+      <Limb points={pose.spine} color={NEAR} width={TORSO} to={end?.spine} tempo={tempo} />
+      <circle cx={hx} cy={hy} r={9} fill={NEAR}>
+        {headTo ? (
+          <>
+            <animate
+              attributeName="cx"
+              values={`${hx};${headTo[0]};${hx}`}
+              keyTimes="0;0.5;1"
+              calcMode="spline"
+              keySplines={`${EASE};${EASE}`}
+              dur={`${tempo}s`}
+              repeatCount="indefinite"
+            />
+            <animate
+              attributeName="cy"
+              values={`${hy};${headTo[1]};${hy}`}
+              keyTimes="0;0.5;1"
+              calcMode="spline"
+              keySplines={`${EASE};${EASE}`}
+              dur={`${tempo}s`}
+              repeatCount="indefinite"
+            />
+          </>
+        ) : null}
+      </circle>
+      <Limb points={pose.legNear ?? []} color={NEAR} to={end?.legNear} tempo={tempo} />
+      <Limb points={pose.armNear ?? []} color={NEAR} to={end?.armNear} tempo={tempo} />
       {pose.propsFront?.map((prop, index) => (
-        <Gear key={`f${index}`} prop={prop} />
+        <MovingGear key={`f${index}`} prop={prop} to={end?.propsFront?.[index] ?? null} tempo={tempo} />
       ))}
     </g>
   );

@@ -22,7 +22,7 @@ por defecto es un fichero JSON (`.lordgym-data/db.json`) que se siembra sola.
 
 ### Cuentas
 
-El primer arranque crea **la biblioteca de 94 ejercicios, las 13 pruebas físicas
+El primer arranque crea **la biblioteca de 128 ejercicios, las 13 pruebas físicas
 y dos cuentas vinculadas entre sí**. Nada más: ni sesiones inventadas, ni
 histórico de mentira, ni jugadores de relleno. El entrenador empieza con su
 plantilla y crea el primer entrenamiento él.
@@ -190,3 +190,12 @@ El MVP del brief (puntos 1 a 15) está completo y funcionando, junto con la
 mayoría de módulos avanzados. Lo que queda pendiente y por qué está en
 [`docs/PROGRESS.md`](docs/PROGRESS.md); las decisiones técnicas y sus
 alternativas, en [`docs/DECISIONS.md`](docs/DECISIONS.md).
+
+---
+
+## Créditos
+
+La selección de ejercicios se apoya en el catálogo abierto de
+[wger](https://github.com/wger-project/wger), publicado bajo **CC-BY-SA**.
+Los textos en español y las ilustraciones de LORDGYM son propios: de wger se ha
+tomado qué ejercicios merecía la pena cubrir, no su contenido.
