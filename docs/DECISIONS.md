@@ -306,3 +306,68 @@ nivel de detalle vale más que uno con 872 de calidad variable.
 los 872 registros: cada una con la ilustración del patrón que le corresponde, en
 vez de cientos cayendo en un dibujo genérico. La atribución a wger está en el
 README.
+
+---
+
+## 19. El vídeo del entrenador no se escribe en el catálogo
+
+**Decisión.** Guardar el vídeo de técnica en una tabla propia, `exercise_media`,
+con clave `(coach_id, exercise_id)`, en vez de rellenar `exercises.video_url`.
+
+**Por qué.** La biblioteca global no es de nadie: son 932 filas con
+`owner_coach_id = null` que ven todos los entrenadores. El vídeo en el que Josep
+explica su press de banca es suyo y sólo suyo; escribirlo en la fila compartida
+se lo enseñaría al club de al lado. Hay un segundo motivo, menos evidente pero
+igual de real: `reconciliarBiblioteca()` reescribe las filas globales en cada
+subida de versión del catálogo, así que un vídeo guardado ahí duraría hasta la
+siguiente actualización.
+
+Al mostrarlo manda el del entrenador; si no ha subido ninguno, se cae al enlace
+que trajera el ejercicio. El jugador ve el de **su** entrenador, no el de otro.
+
+**Qué se pierde.** Una consulta más por pantalla de ejercicios. Se resuelve con
+`videoUrlsFor()`, que trae todos los vídeos de una lista en una sola llamada.
+
+---
+
+## 20. El descanso se cuenta contra el reloj, no restando segundos
+
+**Decisión.** El temporizador guarda una hora de salida (`Date.now() + n`) y
+calcula lo que queda en cada tick, en vez de restar uno cada segundo.
+
+**Por qué.** Durante un descanso el móvil se guarda en el bolsillo, y ahí el
+navegador frena o congela los temporizadores. Restando un segundo por tick, dos
+minutos de descanso se convertían en cuatro y no había forma de darse cuenta de
+por qué. Con una hora fija, el tiempo que pasa fuera cuenta igual y al sacar el
+móvil el número ya es el correcto.
+
+Va con dos cosas más que sólo tienen sentido juntas: el `AudioContext` se prepara
+desde el gesto que marca la serie —en iOS nace suspendido y sólo arranca desde un
+gesto, así que crearlo al terminar el descanso no sonaba nunca— y la pantalla se
+mantiene encendida con `wakeLock` mientras se entrena.
+
+**Qué se pierde.** Cuatro comprobaciones por segundo en lugar de una. Es
+irrelevante al lado de que la cuenta sea verdad.
+
+---
+
+## 21. Se cachea una pantalla privada: el modo entrenamiento
+
+**Decisión.** El service worker guarda la última versión de
+`/player/workout/[id]`, en una caché aparte, y la borra al cerrar sesión.
+
+**Por qué.** La regla del proyecto es no cachear nada personal. Aquí se rompe a
+propósito: muchos gimnasios están en un sótano sin cobertura, y sin esto el
+jugador que llega allí no puede ni abrir su rutina, por muy bien que la bandeja
+de salida sepa guardar lo que apunte. Guardar esa pantalla es lo que convierte
+«funciona sin conexión» en algo cierto.
+
+Hay que pedirlo expresamente desde la propia pantalla (`postMessage`), porque a
+ella casi nunca se llega con una navegación de verdad: se entra pulsando
+«empezar» y Next resuelve eso con una petición de datos, no con una carga de
+página, así que el service worker no llegaba a ver nunca la versión en HTML.
+
+**Qué se pierde.** Queda una copia del entrenamiento en el disco del navegador
+mientras haya sesión abierta. Va en su propia caché (`lordgym-private-*`), no se
+mezcla con la estática, y se borra tanto al salir como al llegar a la pantalla de
+acceso, para el caso de la sesión que caduca sola.

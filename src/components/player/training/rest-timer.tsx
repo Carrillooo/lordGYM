@@ -92,20 +92,24 @@ export function RestTimer({
               <Timer className="h-3.5 w-3.5" />
               Descanso
             </p>
+            {/*
+              Sólo el icono: en un móvil de 390 px la etiqueta completa parte
+              la línea en dos y deja el temporizador descolgado.
+            */}
             <button
               type="button"
               onClick={onToggleSound}
               aria-pressed={soundEnabled}
               aria-label={soundEnabled ? 'Desactivar el aviso sonoro' : 'Activar el aviso sonoro'}
+              title={soundEnabled ? 'Aviso con sonido' : 'Aviso sólo con vibración'}
               className={cn(
-                'inline-flex h-7 items-center gap-1 rounded-lg border px-2 text-[11px] font-medium transition-colors',
+                'inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border transition-colors',
                 soundEnabled
                   ? 'border-volt-500/40 text-volt-500'
                   : 'border-ink-700 text-ink-400 hover:border-ink-600',
               )}
             >
-              {soundEnabled ? <Bell className="h-3 w-3" /> : <BellOff className="h-3 w-3" />}
-              {soundEnabled ? 'Con sonido' : 'Sin sonido'}
+              {soundEnabled ? <Bell className="h-3.5 w-3.5" /> : <BellOff className="h-3.5 w-3.5" />}
             </button>
           </div>
 

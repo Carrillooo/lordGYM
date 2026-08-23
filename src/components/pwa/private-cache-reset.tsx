@@ -1,23 +1,17 @@
 'use client';
 
 import { useEffect } from 'react';
+import { clearPrivateCache } from '@/lib/offline/private-cache';
 
 /**
- * Borra del móvil la copia de las pantallas privadas.
+ * Borra del móvil la copia de las pantallas privadas al llegar al acceso.
  *
- * Se monta en la pantalla de acceso, que es por donde se pasa tanto al cerrar
- * sesión como al entrar por primera vez. El service worker guarda la última
- * versión del modo entrenamiento para poder abrirlo sin cobertura; esa copia no
- * puede sobrevivir a un cierre de sesión en un móvil compartido.
+ * El camino normal es el botón de salir, que ya la borra. Esto cubre el otro:
+ * la sesión que caduca sola y deja al jugador en la pantalla de acceso sin
+ * haber pulsado nada.
  */
 export function PrivateCacheReset() {
-  useEffect(() => {
-    navigator.serviceWorker?.ready
-      .then((registration) => registration.active?.postMessage({ type: 'clear-private-cache' }))
-      .catch(() => {
-        // Sin service worker no hay nada guardado que borrar.
-      });
-  }, []);
+  useEffect(() => clearPrivateCache(), []);
 
   return null;
 }

@@ -111,6 +111,18 @@ export function TrainingSession({
   // La pantalla no se apaga mientras se entrena.
   useWakeLock(true);
 
+  // Y se guarda una copia de esta pantalla en el móvil, para poder abrirla
+  // mañana aunque el gimnasio no tenga cobertura. Ver `public/sw.js`.
+  useEffect(() => {
+    const url = window.location.href;
+    const guardar = () => {
+      navigator.serviceWorker?.controller?.postMessage({ type: 'cache-screen', url });
+    };
+    guardar();
+    window.addEventListener('online', guardar);
+    return () => window.removeEventListener('online', guardar);
+  }, []);
+
   const [state, setState] = useState<Record<string, SetState>>(() => {
     const initial: Record<string, SetState> = {};
     for (const exercise of exercises) {

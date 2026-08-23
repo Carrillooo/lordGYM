@@ -222,16 +222,43 @@ Ver [`SECURITY.md`](SECURITY.md). En resumen:
 `components/player/training/` es la pantalla más cuidada del producto:
 
 1. Al empezar, la plantilla se **copia** a `session_exercises` / `session_sets`.
-2. Cada serie completada se escribe primero en `localStorage`
-   (`lib/offline/queue.ts`) y después se envía al servidor.
-3. Si el envío falla, la serie queda en cola y se reintenta al volver la
-   conexión (`window.addEventListener('online')`).
-4. La clave de la cola es el id de la serie: reintentar **actualiza**, nunca
-   duplica.
+2. Todo lo que el jugador hace —serie, comentario y cierre de la sesión— se
+   escribe primero en `localStorage` (`lib/offline/outbox.ts`) y después se
+   envía al servidor.
+3. Si el envío falla, queda en la bandeja y se reintenta al volver la conexión.
+   El vaciado (`lib/offline/sync.ts`) vive en el armazón del jugador, no en la
+   pantalla de entrenamiento: la cobertura suele volver al salir a la calle,
+   cuando esa pantalla ya está cerrada.
+4. La clave de cada entrada es el id de la fila (la serie, el ejercicio, la
+   sesión): reintentar **actualiza**, nunca duplica.
+5. El cierre se envía siempre el último, porque el servidor calcula el volumen
+   de la sesión con las series que tiene guardadas.
+6. Dos tipos de fallo, dos respuestas: sin red se conserva y se corta el
+   vaciado; si el servidor lo **rechaza**, se descarta —reintentar no cambiaría
+   la respuesta, y una entrada envenenada bloquearía el cierre, que va detrás.
 
-El service worker no cachea datos personales a propósito: sólo el esqueleto
-estático y la pantalla de «sin conexión». Lo que hace que el gimnasio sin
-cobertura funcione es la cola, no la caché.
+El service worker sigue sin cachear datos personales, con una excepción
+deliberada: la pantalla del modo entrenamiento. Va en su propia caché
+(`lordgym-private-*`), la pide la propia pantalla con un `postMessage` —a ella
+casi nunca se llega con una navegación de verdad— y se borra al cerrar sesión y
+al llegar al acceso. Sin eso, llegar a un gimnasio sin cobertura es no poder ni
+abrir la rutina, por muy bien que funcione la bandeja de salida.
+
+---
+
+## Vídeos
+
+`lib/media/` es un almacén intercambiable, con la misma forma que `lib/db`:
+Vercel Blob si hay `BLOB_READ_WRITE_TOKEN`, disco en desarrollo, y ninguno en
+serverless sin token (un fichero en el disco de Vercel se evapora en el
+siguiente despliegue). Sin almacén no se rompe nada: los campos de vídeo siguen
+admitiendo un enlace pegado a mano.
+
+Con Blob el fichero va del navegador al almacén **sin pasar por el servidor**:
+una función serverless de Vercel rechaza cuerpos de más de 4,5 MB. El servidor
+sólo emite el permiso de subida, y ahí es donde se comprueba de quién es el
+ejercicio o la sesión (`lib/media/authorize.ts`). El vídeo de técnica no se
+escribe en la biblioteca compartida: ver `DECISIONS.md` §19.
 
 ---
 

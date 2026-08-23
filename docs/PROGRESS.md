@@ -1,6 +1,6 @@
 # Estado del proyecto
 
-Última actualización: catálogo completo de wger (932 ejercicios) y puesta al día de bases ya sembradas.
+Última actualización: vídeos de verdad, descanso que no miente y un gimnasio sin cobertura que ya no cuesta un entrenamiento.
 
 ## Verificación
 
@@ -9,8 +9,8 @@ Todo lo que sigue está comprobado en esta misma entrega:
 ```
 npm run lint       ✓ sin errores ni avisos
 npm run typecheck  ✓ TypeScript estricto
-npm test           ✓ 52 tests (incluye el ciclo completo, en local y en PostgreSQL)
-npm run build      ✓ 32 rutas, sin avisos
+npm test           ✓ 62 tests (incluye el ciclo completo, en local y en PostgreSQL)
+npm run build      ✓ 34 rutas, sin avisos
 ```
 
 Además se ha recorrido la aplicación con un navegador real (Chromium, iPhone 390
@@ -232,14 +232,59 @@ Nada para probar la aplicación en local. Para producción:
 
 ---
 
+## Última entrega
+
+Tres cosas que sólo se notan usando la app en un gimnasio de verdad.
+
+**Vídeos.** Se acabó pegar enlaces. El entrenador sube su vídeo de técnica desde
+el móvil a cualquier ejercicio —también a los 932 del catálogo, sin escribir en
+la biblioteca compartida: va en `exercise_media`, por entrenador— y el jugador
+graba su serie durante la sesión para que se la corrijan. Se reproducen dentro de
+la app: salir a otra pestaña en mitad de una serie es perder el cronómetro y el
+sitio. El almacén es intercambiable igual que el de datos (Vercel Blob, disco en
+local, ninguno si no hay token) y con Blob el fichero va del navegador al almacén
+sin tocar el servidor, porque una función de Vercel corta el cuerpo a 4,5 MB.
+
+**Descanso.** El cronómetro restaba un segundo por tick, y el navegador congela
+los temporizadores con la pantalla apagada: dos minutos de descanso se
+convertían en cuatro. Ahora cuenta contra una hora de salida fija. El aviso
+sonoro tampoco funcionaba en iPhone —y fallaba callando— porque el
+`AudioContext` sólo arranca desde un gesto del usuario; se prepara con el dedo
+que marca la serie. Y la pantalla ya no se apaga mientras se entrena.
+
+**Sin cobertura.** Antes sólo se guardaban las series. Ahora también el
+comentario y el cierre de la sesión, en una bandeja de salida que envía el cierre
+el último (el servidor calcula el volumen con lo que tiene guardado). Terminar
+sin red guarda el entreno en el móvil y lo dice tal cual, sin fingir que ha
+llegado a ninguna parte. Y el service worker guarda la pantalla de entrenamiento
+para poder abrirla en un sótano sin cobertura; es la única pantalla privada que
+se cachea, va aparte y se borra al cerrar sesión.
+
+Por el camino salió un fallo serio, y no en una revisión del código sino al
+probar la app entera: la red de seguridad que repone las cuentas se había traído
+consigo la limpieza del historial de demostración, y corría en **todos** los
+arranques. En Vercel cada despliegue es un arranque, así que cada versión que se
+subía dejaba al jugador sin sus sesiones, sus récords y sus asignaciones.
+Corregido, con un test que arranca cuatro veces seguidas y comprueba que el
+entrenamiento sigue ahí.
+
+Comprobado en Chromium real (390 px): el vídeo del entrenador se ve en la sesión,
+`/api/media` responde a `Range`, el descanso pasa de 01:30 a 00:30 al saltar el
+reloj 60 s, el cierre sin red queda guardado y se envía solo al volver la
+cobertura, y la pantalla de entrenamiento se recarga sin conexión y deja de
+hacerlo tras cerrar sesión.
+
+---
+
 ## Próxima sesión
 
 Por orden sugerido:
 
-1. Subida de ficheros (desbloquea vídeos y fotos reales): Vercel Blob si la base
-   es PostgreSQL, o Supabase Storage si se usa Supabase.
-2. Informe PDF del jugador reutilizando lo que ya calcula `services/progress`.
-3. Notificaciones push y recordatorio de sesión.
+1. Notificaciones push y recordatorio de sesión: es lo que hace que la app se use
+   tres meses y no tres semanas.
+2. Recuperación de contraseña y límite de intentos en el acceso. Están señalados
+   en [`SECURITY.md`](SECURITY.md) y hoy un olvido deja fuera sin vuelta atrás.
+3. Informe PDF del jugador reutilizando lo que ya calcula `services/progress`.
 4. Modo claro: segundo juego de tokens en `globals.css` y conmutador en ajustes.
 5. Si el club crece: mover las agregaciones más pesadas
    (`getRoster`, `coachDashboardStats`) a vistas SQL detrás del mismo servicio.

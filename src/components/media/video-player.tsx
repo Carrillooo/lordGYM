@@ -51,7 +51,9 @@ export function VideoPlayer({
       controls
       playsInline
       preload="metadata"
-      className={cn('w-full rounded-xl border border-ink-700 bg-ink-950', className)}
+      // Se limita la altura: un vídeo grabado en vertical con el móvil ocupa
+      // si no la pantalla entera y esconde las series.
+      className={cn('max-h-[45vh] w-full rounded-xl border border-ink-700 bg-ink-950', className)}
     />
   );
 }

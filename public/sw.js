@@ -49,10 +49,35 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// La pantalla de acceso pide que se borre lo privado: ver `private-cache-reset`.
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'clear-private-cache') {
+  const data = event.data || {};
+
+  // La pantalla de acceso pide que se borre lo privado.
+  if (data.type === 'clear-private-cache') {
     event.waitUntil(caches.delete(PRIVATE_CACHE));
+    return;
+  }
+
+  /*
+   * El modo entrenamiento pide que se guarde una copia de sí mismo.
+   *
+   * Hace falta pedirlo expresamente porque a esa pantalla casi nunca se llega
+   * con una navegación de verdad: se entra pulsando «empezar», y Next resuelve
+   * eso con una petición de datos, no con una carga de página. El service
+   * worker no llega a ver nunca la versión en HTML, que es justo la que hace
+   * falta el día que no haya cobertura.
+   */
+  if (data.type === 'cache-screen' && typeof data.url === 'string') {
+    event.waitUntil(
+      fetch(data.url, { credentials: 'include' })
+        .then((response) => {
+          if (!response.ok || response.redirected) return;
+          return caches.open(PRIVATE_CACHE).then((cache) => cache.put(data.url, response));
+        })
+        .catch(() => {
+          // Sin red no hay copia nueva que guardar; sigue valiendo la anterior.
+        }),
+    );
   }
 });
 
@@ -95,7 +120,15 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => caches.match(request).then((cached) => cached || caches.match('/offline'))),
+        // `ignoreVary`: la copia se guardó con una petición normal y la que
+        // llega ahora es de navegación; sin esto las cabeceras `Vary` de Next
+        // harían que no se reconocieran como la misma.
+        .catch(() =>
+          caches
+            .match(request, { ignoreVary: true })
+            .then((cached) => cached || caches.match(url.href, { ignoreVary: true }))
+            .then((cached) => cached || caches.match('/offline')),
+        ),
     );
     return;
   }

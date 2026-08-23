@@ -66,8 +66,9 @@ siembra la biblioteca de 48 ejercicios y las 13 pruebas físicas.
 | `DATABASE_URL`              | Vercel, al conectar Neon |
 | `LORDGYM_SESSION_SECRET`    | Tú (paso A2)             |
 | `LORDGYM_INITIAL_PASSWORD`  | Opcional (ver abajo)     |
+| `BLOB_READ_WRITE_TOKEN`     | Vercel, al crear el Blob |
 
-En el primer arranque LORDGYM carga la biblioteca de 48 ejercicios, las 13
+En el primer arranque LORDGYM carga la biblioteca de 932 ejercicios, las 13
 pruebas físicas y **dos cuentas vinculadas**: `jusa@lordgym.app` (Josep Sobervia,
 entrenador) y `adrian@lordgym.app` (Adrián Carrillo, jugador). No siembra ningún
 dato de mentira: ni sesiones, ni histórico, ni jugadores de relleno.
@@ -76,6 +77,26 @@ La contraseña inicial de ambas es `lordgym2026`. **Ponla en
 `LORDGYM_INITIAL_PASSWORD` antes del primer despliegue**, o cámbiala nada más
 entrar desde Configuración (entrenador) o Perfil (jugador): la de por defecto
 está escrita en el repositorio, así que cualquiera que lo lea la conoce.
+
+### Vídeos
+
+Para que el entrenador pueda subir vídeos de técnica y el jugador grabar sus
+series, hace falta un almacén de ficheros: en Vercel, pestaña **Storage → Blob**.
+Al crearlo se define `BLOB_READ_WRITE_TOKEN` sola y la subida se activa en el
+siguiente despliegue.
+
+Sin ese token no se rompe nada: los campos de vídeo siguen admitiendo un enlace
+pegado a mano, que es como funcionaban antes. Simplemente no aparece el botón de
+subir.
+
+El vídeo va del móvil al almacén sin pasar por el servidor. Tiene que ser así:
+una función serverless de Vercel rechaza cuerpos de más de 4,5 MB y un vídeo
+grabado con el iPhone pesa mucho más. El límite queda en 200 MB por fichero.
+
+En local no hace falta configurar nada: los ficheros se guardan en
+`.lordgym-media/` (se puede cambiar con `LORDGYM_MEDIA_DIR`) y se sirven por
+`/api/media/…`, que exige sesión. Con `LORDGYM_MEDIA_DRIVER` se fuerza el modo:
+`blob`, `local` u `off`.
 
 También se aceptan `POSTGRES_URL`, `POSTGRES_PRISMA_URL` y
 `LORDGYM_DATABASE_URL`. Y hay dos ajustes opcionales:
