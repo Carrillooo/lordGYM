@@ -113,6 +113,16 @@ create table if not exists exercises (
   created_at timestamptz not null default now()
 );
 
+create table if not exists exercise_media (
+  id uuid primary key default gen_random_uuid(),
+  coach_id uuid not null references coaches (id) on delete cascade,
+  exercise_id uuid not null references exercises (id) on delete cascade,
+  video_url text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (coach_id, exercise_id)
+);
+
 create table if not exists workouts (
   id uuid primary key default gen_random_uuid(),
   coach_id uuid not null references coaches (id) on delete cascade,
@@ -363,6 +373,7 @@ create index if not exists idx_sessions_athlete on workout_sessions (athlete_id,
 create index if not exists idx_session_exercises_session on session_exercises (session_id);
 create index if not exists idx_session_exercises_exercise on session_exercises (exercise_id);
 create index if not exists idx_session_sets_exercise on session_sets (session_exercise_id);
+create index if not exists idx_exercise_media_coach on exercise_media (coach_id);
 create index if not exists idx_workout_exercises_workout on workout_exercises (workout_id, position);
 create index if not exists idx_workout_sets_exercise on workout_sets (workout_exercise_id, set_index);
 create index if not exists idx_records_athlete on personal_records (athlete_id, exercise_id);

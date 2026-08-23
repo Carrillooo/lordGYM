@@ -14,6 +14,7 @@ import {
   X,
 } from 'lucide-react';
 import type { ExerciseCategory, SetStatus } from '@/types/db';
+import type { MediaMode } from '@/lib/media/types';
 import { logSetAction } from '@/lib/actions/player';
 import { clearSession, dequeue, enqueue, pending } from '@/lib/offline/queue';
 import { formatDuration, formatShortDate } from '@/lib/domain/datetime';
@@ -26,6 +27,7 @@ import { FinishSheet } from './finish-sheet';
 import { ExitDialog } from './exit-dialog';
 import { ExerciseFeedback } from './exercise-feedback';
 import { AnimatedExerciseFigureFrame } from '@/components/exercise/exercise-figure-animated';
+import { VideoPlayer } from '@/components/media/video-player';
 
 export interface TrainingSet {
   id: string;
@@ -79,13 +81,16 @@ export function TrainingSession({
   workoutName,
   startedAt,
   exercises,
+  mediaMode,
 }: {
   sessionId: string;
   workoutName: string;
   startedAt: string;
   exercises: TrainingExercise[];
+  mediaMode: MediaMode;
 }) {
   const [current, setCurrent] = useState(0);
+  const [showVideo, setShowVideo] = useState(false);
   const [elapsed, setElapsed] = useState(() => Math.max(0, Math.floor((Date.now() - Date.parse(startedAt)) / 1000)));
   const [rest, setRest] = useState<{ seconds: number; key: number } | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(false);
@@ -223,6 +228,7 @@ export function TrainingSession({
   function goTo(index: number) {
     if (index < 0 || index >= exercises.length) return;
     setCurrent(index);
+    setShowVideo(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -309,17 +315,32 @@ export function TrainingSession({
               </div>
             </div>
             {exercise.videoUrl ? (
-              <a
-                href={exercise.videoUrl}
-                target="_blank"
-                rel="noreferrer"
+              <button
+                type="button"
+                onClick={() => setShowVideo((value) => !value)}
                 aria-label="Ver vídeo de técnica"
-                className="shrink-0 rounded-xl border border-ink-700 p-2.5 text-ink-300 transition-colors hover:border-volt-500 hover:text-volt-500"
+                aria-expanded={showVideo}
+                className={cn(
+                  'shrink-0 rounded-xl border p-2.5 transition-colors',
+                  showVideo
+                    ? 'border-volt-500 text-volt-500'
+                    : 'border-ink-700 text-ink-300 hover:border-volt-500 hover:text-volt-500',
+                )}
               >
                 <Video className="h-5 w-5" />
-              </a>
+              </button>
             ) : null}
           </div>
+
+          {/*
+            El vídeo se reproduce aquí dentro, no en otra pestaña: en mitad de
+            una serie, salir de la app es perder el cronómetro y el sitio.
+          */}
+          {showVideo && exercise.videoUrl ? (
+            <div className="mt-3">
+              <VideoPlayer url={exercise.videoUrl} label="Ver vídeo de técnica" />
+            </div>
+          ) : null}
 
           {exercise.supersetGroup ? (
             <Badge tone="violet" className="mt-3">
@@ -492,6 +513,7 @@ export function TrainingSession({
             sessionExerciseId={exercise.sessionExerciseId}
             initialComment={exercise.athleteComment}
             initialVideoUrl={exercise.videoNote}
+            mediaMode={mediaMode}
           />
 
           {exercise.technique || exercise.description ? (

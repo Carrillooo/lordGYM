@@ -1,14 +1,45 @@
 'use client';
 
+import { useState } from 'react';
 import { Dumbbell, Target, Video } from 'lucide-react';
 import type { ExerciseRow } from '@/types/db';
+import type { MediaMode } from '@/lib/media/types';
+import { saveExerciseVideoAction } from '@/lib/actions/exercises';
 import { CATEGORY_LABELS, METRIC_LABELS } from '@/lib/domain/labels';
 import { Badge } from '@/components/ui/primitives';
 import { Modal } from '@/components/ui/modal';
+import { VideoPlayer } from '@/components/media/video-player';
+import { VideoUpload } from '@/components/media/video-upload';
 import { AnimatedExerciseFigureFrame } from './exercise-figure-animated';
 
-/** Ficha completa: ilustración, para qué sirve y cómo se hace. */
-export function ExerciseDetail({ exercise }: { exercise: ExerciseRow }) {
+/**
+ * Ficha completa: ilustración, para qué sirve, cómo se hace y —si el
+ * entrenador lo ha subido— el vídeo de técnica del club.
+ *
+ * La ilustración y el vídeo no compiten: el dibujo animado se ve siempre y
+ * carga al instante; el vídeo es el detalle que sólo se mira cuando hace falta.
+ */
+export function ExerciseDetail({
+  exercise,
+  videoUrl,
+  mediaMode,
+}: {
+  exercise: ExerciseRow;
+  /** Vídeo efectivo para quien mira (el del entrenador, o el del ejercicio). */
+  videoUrl?: string | null;
+  /** Definido sólo para el entrenador: habilita subir o cambiar el vídeo. */
+  mediaMode?: MediaMode;
+}) {
+  const [video, setVideo] = useState<string | null>(videoUrl ?? exercise.video_url);
+
+  async function save(url: string | null) {
+    setVideo(url);
+    const result = await saveExerciseVideoAction({ exerciseId: exercise.id, videoUrl: url });
+    // Si el servidor lo rechaza se deshace: nunca dejamos en pantalla un vídeo
+    // que en realidad no se ha guardado.
+    if (result.status === 'error') setVideo(videoUrl ?? exercise.video_url);
+  }
+
   return (
     <div className="space-y-5">
       <AnimatedExerciseFigureFrame
@@ -67,16 +98,24 @@ export function ExerciseDetail({ exercise }: { exercise: ExerciseRow }) {
         ) : null}
       </div>
 
-      {exercise.video_url ? (
-        <a
-          href={exercise.video_url}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-2 text-sm font-medium text-volt-500 hover:underline"
-        >
-          <Video className="h-4 w-4" />
-          Ver vídeo de técnica
-        </a>
+      {video || mediaMode ? (
+        <section className="space-y-3">
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-ink-100">
+            <Video className="h-4 w-4 text-volt-500" />
+            Vídeo de técnica
+          </h3>
+          {video ? <VideoPlayer url={video} label="Ver vídeo de técnica" /> : null}
+          {mediaMode ? (
+            <VideoUpload
+              mode={mediaMode}
+              scope={{ kind: 'exercise-video', targetId: exercise.id }}
+              hasVideo={Boolean(video)}
+              onUploaded={save}
+              onRemove={() => save(null)}
+              label="Subir vídeo de técnica"
+            />
+          ) : null}
+        </section>
       ) : null}
     </div>
   );
@@ -84,14 +123,22 @@ export function ExerciseDetail({ exercise }: { exercise: ExerciseRow }) {
 
 export function ExerciseDetailModal({
   exercise,
+  videoUrl,
+  mediaMode,
   onClose,
 }: {
   exercise: ExerciseRow | null;
+  videoUrl?: string | null;
+  mediaMode?: MediaMode;
   onClose: () => void;
 }) {
   return (
     <Modal open={exercise !== null} onClose={onClose} title={exercise?.name ?? ''} size="md">
-      {exercise ? <ExerciseDetail exercise={exercise} /> : null}
+      {exercise ? (
+        // La clave fuerza un componente nuevo por ejercicio: sin ella el
+        // estado del vídeo se arrastraría de una ficha a la siguiente.
+        <ExerciseDetail key={exercise.id} exercise={exercise} videoUrl={videoUrl} mediaMode={mediaMode} />
+      ) : null}
     </Modal>
   );
 }

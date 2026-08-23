@@ -231,14 +231,38 @@ export async function setExerciseComment(
   comment: string | null,
   videoUrl?: string | null,
 ): Promise<void> {
-  const [sessionExercise] = await db().select('session_exercises', { id: sessionExerciseId });
-  if (!sessionExercise) throw new ServiceError('Ejercicio no encontrado.');
-  const [session] = await db().select('workout_sessions', { id: sessionExercise.session_id, athlete_id: athleteId });
-  if (!session) throw new ServiceError('Esa sesión no es tuya.');
+  await ownSessionExercise(athleteId, sessionExerciseId);
   await db().update('session_exercises', sessionExerciseId, {
     athlete_comment: comment,
     ...(videoUrl !== undefined ? { video_url: videoUrl } : {}),
   });
+}
+
+/** Vídeo que el jugador tiene subido para un ejercicio de su sesión. */
+export async function exerciseVideoUrl(athleteId: string, sessionExerciseId: string): Promise<string | null> {
+  const sessionExercise = await ownSessionExercise(athleteId, sessionExerciseId);
+  return sessionExercise.video_url;
+}
+
+export async function setExerciseVideoUrl(
+  athleteId: string,
+  sessionExerciseId: string,
+  videoUrl: string | null,
+): Promise<void> {
+  await ownSessionExercise(athleteId, sessionExerciseId);
+  await db().update('session_exercises', sessionExerciseId, { video_url: videoUrl });
+}
+
+/** Comprueba que el ejercicio pertenece a una sesión del jugador. */
+async function ownSessionExercise(athleteId: string, sessionExerciseId: string) {
+  const [sessionExercise] = await db().select('session_exercises', { id: sessionExerciseId });
+  if (!sessionExercise) throw new ServiceError('Ejercicio no encontrado.');
+  const [session] = await db().select('workout_sessions', {
+    id: sessionExercise.session_id,
+    athlete_id: athleteId,
+  });
+  if (!session) throw new ServiceError('Esa sesión no es tuya.');
+  return sessionExercise;
 }
 
 async function recomputeVolume(sessionId: string): Promise<number> {

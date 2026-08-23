@@ -1,6 +1,9 @@
 import { notFound, redirect } from 'next/navigation';
 import { requireAthlete } from '@/lib/auth/guards';
 import { getSessionDetail } from '@/lib/services/sessions';
+import { coachOfAthlete } from '@/lib/services/roster';
+import { videoUrlsFor } from '@/lib/services/exercise-media';
+import { mediaMode } from '@/lib/media';
 import { db } from '@/lib/db';
 import { TrainingSession } from '@/components/player/training/training-session';
 import type { TrainingExercise } from '@/components/player/training/training-session';
@@ -34,6 +37,14 @@ export default async function PlayerWorkoutPage({ params }: { params: Promise<{ 
 
   if (detail.session.status === 'skipped') redirect('/player');
 
+  // El vídeo que ve el jugador es el que ha subido SU entrenador; si no hay,
+  // el que trajera el propio ejercicio del catálogo.
+  const coach = await coachOfAthlete(athlete.id);
+  const coachVideos = await videoUrlsFor(
+    detail.exercises.map((row) => row.exercise.id),
+    coach?.coach.id ?? null,
+  );
+
   const exercises: TrainingExercise[] = detail.exercises.map((row) => ({
     sessionExerciseId: row.sessionExercise.id,
     name: row.exercise.name,
@@ -44,7 +55,7 @@ export default async function PlayerWorkoutPage({ params }: { params: Promise<{ 
     technique: row.exercise.technique,
     figureKey: row.exercise.figure_key,
     category: row.exercise.category,
-    videoUrl: row.exercise.video_url,
+    videoUrl: coachVideos.get(row.exercise.id) ?? row.exercise.video_url,
     supersetGroup: row.sessionExercise.superset_group,
     lastTime: row.lastTime,
     bestWeightKg: row.bestWeightKg,
@@ -73,6 +84,7 @@ export default async function PlayerWorkoutPage({ params }: { params: Promise<{ 
       workoutName={detail.workoutName}
       startedAt={detail.session.started_at}
       exercises={exercises}
+      mediaMode={mediaMode()}
     />
   );
 }

@@ -2,26 +2,46 @@
 
 import { useState } from 'react';
 import { Check, Loader2, MessageSquare } from 'lucide-react';
-import { saveExerciseCommentAction } from '@/lib/actions/player';
+import { saveExerciseCommentAction, saveSessionVideoAction } from '@/lib/actions/player';
+import type { MediaMode } from '@/lib/media/types';
+import { VideoPlayer } from '@/components/media/video-player';
+import { VideoUpload } from '@/components/media/video-upload';
 
 /**
  * Comentario y vídeo del jugador para un ejercicio (§75, §77).
  * Va plegado para no estorbar durante la serie; el entrenador lo ve en la
  * ficha del jugador.
+ *
+ * El vídeo se guarda por su cuenta, en cuanto termina de subir, y no al pulsar
+ * «guardar»: una subida de 50 MB desde el móvil tarda lo suyo y nadie se queda
+ * mirando el botón hasta que acabe.
  */
 export function ExerciseFeedback({
   sessionExerciseId,
   initialComment,
   initialVideoUrl,
+  mediaMode,
 }: {
   sessionExerciseId: string;
   initialComment: string | null;
   initialVideoUrl: string | null;
+  mediaMode: MediaMode;
 }) {
   const [comment, setComment] = useState(initialComment ?? '');
   const [videoUrl, setVideoUrl] = useState(initialVideoUrl ?? '');
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [message, setMessage] = useState<string | null>(null);
+
+  async function saveVideo(url: string | null) {
+    const previous = videoUrl;
+    setVideoUrl(url ?? '');
+    const result = await saveSessionVideoAction({ sessionExerciseId, videoUrl: url });
+    if (result.status === 'error') {
+      setVideoUrl(previous);
+      setStatus('error');
+      setMessage(result.message ?? 'No se ha podido guardar el vídeo.');
+    }
+  }
 
   async function save() {
     setStatus('saving');
@@ -61,16 +81,29 @@ export function ExerciseFeedback({
           />
         </label>
 
-        <label className="block">
-          <span className="sr-only">Enlace a un vídeo de la serie</span>
-          <input
-            type="url"
-            value={videoUrl}
-            onChange={(event) => setVideoUrl(event.target.value)}
-            placeholder="Enlace a un vídeo de la serie (opcional)"
-            className="h-11 w-full rounded-xl border border-ink-700 bg-ink-900 px-3 text-sm text-ink-50 placeholder:text-ink-500 focus:border-volt-500 focus:outline-none"
+        {videoUrl ? <VideoPlayer url={videoUrl} label="Ver el vídeo que has enviado" /> : null}
+
+        {mediaMode === 'off' ? (
+          <label className="block">
+            <span className="sr-only">Enlace a un vídeo de la serie</span>
+            <input
+              type="url"
+              value={videoUrl}
+              onChange={(event) => setVideoUrl(event.target.value)}
+              placeholder="Enlace a un vídeo de la serie (opcional)"
+              className="h-11 w-full rounded-xl border border-ink-700 bg-ink-900 px-3 text-sm text-ink-50 placeholder:text-ink-500 focus:border-volt-500 focus:outline-none"
+            />
+          </label>
+        ) : (
+          <VideoUpload
+            mode={mediaMode}
+            scope={{ kind: 'session-video', targetId: sessionExerciseId }}
+            hasVideo={Boolean(videoUrl)}
+            onUploaded={saveVideo}
+            onRemove={() => saveVideo(null)}
+            label="Grabar o subir la serie"
           />
-        </label>
+        )}
 
         <div className="flex items-center gap-3">
           <button

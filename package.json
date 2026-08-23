@@ -16,6 +16,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",
     "@types/pg": "^8.23.1",
+    "@vercel/blob": "^2.8.0",
     "clsx": "^2.1.1",
     "framer-motion": "^13.1.1",
     "lucide-react": "^0.545.0",

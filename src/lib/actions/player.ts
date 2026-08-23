@@ -7,11 +7,14 @@ import {
   abandonSession,
   finishSession,
   logSet,
+  exerciseVideoUrl,
   setExerciseComment,
+  setExerciseVideoUrl,
   startSession,
   type FinishSummary,
 } from '@/lib/services/sessions';
 import { saveBodyweight, savePain, saveWellness } from '@/lib/services/wellness';
+import { removeIfOwned } from '@/lib/media';
 import {
   bodyweightSchema,
   finishSessionSchema,
@@ -69,6 +72,27 @@ export async function saveExerciseCommentAction(input: {
     return successState('Comentario guardado.');
   } catch (error) {
     return fromException(error);
+  }
+}
+
+/**
+ * Guarda (o quita) el vídeo que el jugador graba de su serie para que el
+ * entrenador le corrija la técnica. Va aparte del comentario porque la subida
+ * termina cuando termina, no cuando el jugador pulsa «guardar».
+ */
+export async function saveSessionVideoAction(input: {
+  sessionExerciseId: string;
+  videoUrl: string | null;
+}): Promise<ActionState> {
+  try {
+    const { athlete } = await requireAthleteAction();
+    if (input.videoUrl && input.videoUrl.length > 1000) return errorState('Enlace demasiado largo.');
+    const previous = await exerciseVideoUrl(athlete.id, input.sessionExerciseId);
+    await setExerciseVideoUrl(athlete.id, input.sessionExerciseId, input.videoUrl);
+    if (previous && previous !== input.videoUrl) await removeIfOwned(previous);
+    return successState(input.videoUrl ? 'Vídeo enviado a tu entrenador.' : 'Vídeo quitado.');
+  } catch (error) {
+    return fromException(error, 'No se ha podido guardar el vídeo.');
   }
 }
 

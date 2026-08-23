@@ -149,6 +149,23 @@ export interface ExerciseRow {
   created_at: string;
 }
 
+/**
+ * Vídeo de técnica que un entrenador cuelga de un ejercicio.
+ *
+ * Va en su propia tabla y no en `exercises.video_url` porque la biblioteca
+ * global es compartida: el vídeo que graba Josep explicando el press de banca
+ * es suyo, no del catálogo, y no debe verlo el club de al lado. Además así la
+ * puesta al día del catálogo (`seed/reconcile.ts`) nunca lo pisa.
+ */
+export interface ExerciseMediaRow {
+  id: string;
+  coach_id: string;
+  exercise_id: string;
+  video_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface WorkoutRow {
   id: string;
   coach_id: string;
@@ -421,6 +438,7 @@ export interface Tables {
   teams: TeamRow;
   team_members: TeamMemberRow;
   exercises: ExerciseRow;
+  exercise_media: ExerciseMediaRow;
   workouts: WorkoutRow;
   workout_exercises: WorkoutExerciseRow;
   workout_sets: WorkoutSetRow;
@@ -456,6 +474,7 @@ export const TABLE_NAMES: TableName[] = [
   'teams',
   'team_members',
   'exercises',
+  'exercise_media',
   'workouts',
   'workout_exercises',
   'workout_sets',

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, CalendarPlus, MessageSquare, Quote, Ruler, Target, Video, Weight } from 'lucide-react';
+import { ArrowLeft, CalendarPlus, MessageSquare, Quote, Ruler, Target, Weight } from 'lucide-react';
 import { requireCoach } from '@/lib/auth/guards';
 import { getAthleteForCoach } from '@/lib/services/roster';
 import {
@@ -23,6 +23,7 @@ import { TrendChart } from '@/components/charts/charts';
 import { AthleteStatusBadge } from '@/components/coach/athlete-status';
 import { ExerciseProgressPanel } from '@/components/progress/exercise-progress-panel';
 import { CoachNotesPanel } from '@/components/coach/coach-notes-panel';
+import { VideoPlayer } from '@/components/media/video-player';
 import { AthleteFicheForm } from '@/components/coach/athlete-fiche-form';
 import { getRosterStatus } from '@/lib/services/roster-status';
 
@@ -404,16 +405,14 @@ export default async function CoachPlayerDetailPage({
                     {item.comment}
                   </p>
                 ) : null}
+                {/*
+                  El vídeo se ve aquí mismo: corregir la técnica es mirar el
+                  vídeo junto al comentario, no abrirlo en otra pestaña.
+                */}
                 {item.videoUrl ? (
-                  <a
-                    href={item.videoUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-data-500 hover:underline"
-                  >
-                    <Video className="h-3.5 w-3.5" />
-                    Ver vídeo de la serie
-                  </a>
+                  <div className="mt-2 max-w-sm">
+                    <VideoPlayer url={item.videoUrl} label="Ver vídeo de la serie" className="aspect-video" />
+                  </div>
                 ) : null}
               </li>
             ))}

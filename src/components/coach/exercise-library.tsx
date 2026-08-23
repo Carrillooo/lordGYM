@@ -3,6 +3,7 @@
 import { useActionState, useMemo, useState } from 'react';
 import { Dumbbell, Pencil, Plus, Search, Trash2, Video } from 'lucide-react';
 import type { ExerciseRow } from '@/types/db';
+import type { MediaMode } from '@/lib/media/types';
 import { createExerciseAction, deleteExerciseAction, updateExerciseAction } from '@/lib/actions/exercises';
 import { idleState } from '@/lib/actions/state';
 import { CATEGORY_LABELS, CATEGORY_ORDER, METRIC_LABELS } from '@/lib/domain/labels';
@@ -15,7 +16,18 @@ import { ExerciseFigureFrame } from '@/components/exercise/exercise-figure';
 import { ExerciseDetailModal } from '@/components/exercise/exercise-detail';
 import { cn } from '@/lib/cn';
 
-export function ExerciseLibrary({ exercises, coachId }: { exercises: ExerciseRow[]; coachId: string }) {
+export function ExerciseLibrary({
+  exercises,
+  coachId,
+  videos,
+  mediaMode,
+}: {
+  exercises: ExerciseRow[];
+  coachId: string;
+  /** Vídeos que este entrenador ha subido, por id de ejercicio. */
+  videos: Record<string, string>;
+  mediaMode: MediaMode;
+}) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
   const [scope, setScope] = useState<'all' | 'own'>('all');
@@ -139,16 +151,15 @@ export function ExerciseLibrary({ exercises, coachId }: { exercises: ExerciseRow
                 <div className="mt-auto flex items-center justify-between gap-2 pt-4">
                   <span className="text-xs text-ink-500">{METRIC_LABELS[exercise.metric_type]}</span>
                   <div className="flex items-center gap-1">
-                    {exercise.video_url ? (
-                      <a
-                        href={exercise.video_url}
-                        target="_blank"
-                        rel="noreferrer"
+                    {videos[exercise.id] || exercise.video_url ? (
+                      <button
+                        type="button"
+                        onClick={() => setViewing(exercise)}
                         aria-label="Ver vídeo de técnica"
-                        className="rounded-lg p-1.5 text-ink-400 transition-colors hover:bg-ink-800 hover:text-volt-500"
+                        className="rounded-lg p-1.5 text-volt-500 transition-colors hover:bg-ink-800"
                       >
                         <Video className="h-4 w-4" />
-                      </a>
+                      </button>
                     ) : null}
                     {exercise.owner_coach_id === coachId ? (
                       <>
@@ -180,7 +191,12 @@ export function ExerciseLibrary({ exercises, coachId }: { exercises: ExerciseRow
         </ul>
       )}
 
-      <ExerciseDetailModal exercise={viewing} onClose={() => setViewing(null)} />
+      <ExerciseDetailModal
+        exercise={viewing}
+        videoUrl={viewing ? (videos[viewing.id] ?? viewing.video_url) : null}
+        mediaMode={mediaMode}
+        onClose={() => setViewing(null)}
+      />
       <ExerciseFormModal open={creating} onClose={() => setCreating(false)} />
       <ExerciseFormModal open={editing !== null} onClose={() => setEditing(null)} exercise={editing ?? undefined} />
     </div>

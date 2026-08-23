@@ -2,7 +2,9 @@
 
 import { revalidatePath } from 'next/cache';
 import { assertCoachCanEditExercise, requireCoachAction } from '@/lib/auth/guards';
-import { createExercise, deleteExercise, updateExercise } from '@/lib/services/exercises';
+import { createExercise, deleteExercise, getExercise, updateExercise } from '@/lib/services/exercises';
+import { setExerciseVideo, videoUrlFor } from '@/lib/services/exercise-media';
+import { removeIfOwned } from '@/lib/media';
 import { exerciseSchema } from '@/lib/validation/schemas';
 import { errorState, fromException, successState, zodFieldErrors, type ActionState } from './state';
 
@@ -55,4 +57,38 @@ export async function deleteExerciseAction(formData: FormData): Promise<void> {
   await assertCoachCanEditExercise(coach.id, exerciseId);
   await deleteExercise(exerciseId);
   revalidatePath('/coach/exercises');
+}
+
+/**
+ * Guarda el vídeo de técnica que el entrenador cuelga de un ejercicio.
+ *
+ * Vale para cualquier ejercicio que vea: también los de la biblioteca global,
+ * porque el vídeo no se escribe en el catálogo compartido sino en su propia
+ * tabla (`exercise_media`). El entrenador quiere enseñar SU press de banca, no
+ * cambiarle el press de banca a nadie.
+ */
+export async function saveExerciseVideoAction(input: {
+  exerciseId: string;
+  videoUrl: string | null;
+}): Promise<ActionState> {
+  try {
+    const { coach } = await requireCoachAction();
+    const exercise = await getExercise(input.exerciseId);
+    if (!exercise) return errorState('Ejercicio no encontrado.');
+    if (exercise.owner_coach_id !== null && exercise.owner_coach_id !== coach.id) {
+      return errorState('Ese ejercicio no es tuyo.');
+    }
+    if (input.videoUrl && input.videoUrl.length > 1000) return errorState('Enlace demasiado largo.');
+
+    const previous = await videoUrlFor(exercise, coach.id);
+    await setExerciseVideo(coach.id, input.exerciseId, input.videoUrl);
+    // Sólo después de que la fila esté guardada: si se borrara antes y fallara
+    // el guardado, quedaría una URL apuntando a un fichero que ya no existe.
+    if (previous && previous !== input.videoUrl) await removeIfOwned(previous);
+
+    revalidatePath('/coach/exercises');
+    return successState(input.videoUrl ? 'Vídeo guardado.' : 'Vídeo quitado.');
+  } catch (error) {
+    return fromException(error);
+  }
 }
