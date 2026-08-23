@@ -167,6 +167,12 @@ function exerciseRow(seed: SeedExercise, createdAt: string): ExerciseRow {
  * Lo aprendimos por las malas: una reconciliación que se cortó entre borrar la
  * cuenta antigua y crear la nueva dejó la instalación sin acceso, y el cerrojo
  * impedía reintentarlo.
+ *
+ * Por eso mismo aquí NO se borra nada, jamás. Esto corre en cada arranque, y en
+ * Vercel cada despliegue es un arranque: cualquier borrado que se cuele aquí se
+ * lleva por delante el historial del jugador cada vez que se sube una versión.
+ * Lo que haya que retirar una sola vez va en `reconcile()`, que está protegido
+ * por la versión del sembrado.
  */
 async function ensureAccounts(): Promise<void> {
   const createdAt = nowIso();
@@ -190,7 +196,7 @@ async function ensureAccounts(): Promise<void> {
     await db().insert('coaches', coach);
   }
 
-  // El jugador, con el historial de demostración fuera.
+  // El jugador.
   let [athleteUser] = await db().select('users', { email: ATHLETE_EMAIL });
   if (!athleteUser) {
     athleteUser = await createUser(ATHLETE_EMAIL, 'Adrián', 'Carrillo', null, 'athlete', createdAt);
@@ -212,9 +218,6 @@ async function ensureAccounts(): Promise<void> {
       created_at: createdAt,
     };
     await db().insert('athletes', athlete);
-  } else {
-    await limpiarHistorial(athlete.id);
-    console.log('[lordgym] historial de demostración del jugador retirado');
   }
 
   const [vinculo] = await db().select('coach_athletes', { coach_id: coach.id, athlete_id: athlete.id });
@@ -332,6 +335,15 @@ async function reconcile(): Promise<void> {
   // Antes que nada: que las cuentas existan. Si lo que viene detrás se corta,
   // al menos se puede entrar.
   await ensureAccounts();
+
+  // El historial inventado del jugador se retira aquí y sólo aquí: una vez, al
+  // subir de versión. En el arranque normal sus sesiones son intocables.
+  const [athleteUser] = await db().select('users', { email: ATHLETE_EMAIL });
+  const [athlete] = athleteUser ? await db().select('athletes', { user_id: athleteUser.id }) : [];
+  if (athlete) {
+    await limpiarHistorial(athlete.id);
+    console.log('[lordgym] historial de demostración del jugador retirado');
+  }
 
   const borradas = await purgarDemo();
   if (borradas > 0) console.log(`[lordgym] retiradas ${borradas} cuentas de demostración`);
