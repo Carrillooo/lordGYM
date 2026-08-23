@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Trophy } from 'lucide-react';
+import { CloudOff, Loader2, Trophy } from 'lucide-react';
 import { finishSessionAction } from '@/lib/actions/player';
+import { enqueueFinish } from '@/lib/offline/outbox';
+import { flushOutbox } from '@/lib/offline/sync';
 import type { FinishSummary } from '@/lib/services/sessions';
 import { FEELING_LABELS, formatNumber } from '@/lib/domain/labels';
 import { formatDuration } from '@/lib/domain/datetime';
@@ -14,7 +16,11 @@ import { Alert } from '@/components/ui/primitives';
 
 /**
  * Cierre de la sesión (§23): resumen, RPE de sesión, sensaciones y comentario.
- * Sólo se muestra «Entrenamiento completado» cuando el servidor confirma.
+ *
+ * Sólo se muestra «Entrenamiento completado» cuando el servidor confirma. Sin
+ * cobertura, el cierre se guarda en el móvil y se dice exactamente eso: que
+ * está guardado pero todavía no enviado. Lo que no puede pasar es que alguien
+ * termine de entrenar en un sótano y pierda la sesión entera.
  */
 export function FinishSheet({
   open,
@@ -22,12 +28,14 @@ export function FinishSheet({
   sessionId,
   elapsedSeconds,
   onFinished,
+  onQueued,
 }: {
   open: boolean;
   onClose: () => void;
   sessionId: string;
   elapsedSeconds: number;
   onFinished: () => void;
+  onQueued: () => void;
 }) {
   const router = useRouter();
   const [rpe, setRpe] = useState<number | null>(7);
@@ -38,15 +46,14 @@ export function FinishSheet({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<FinishSummary | null>(null);
+  const [queued, setQueued] = useState(false);
 
   async function submit() {
     if (rpe === null || feeling === null || fatigue === null || soreness === null) {
       setError('Completa el RPE y las sensaciones.');
       return;
     }
-    setSaving(true);
-    setError(null);
-    const result = await finishSessionAction({
+    const payload = {
       sessionId,
       durationSeconds: elapsedSeconds,
       sessionRpe: rpe,
@@ -54,7 +61,28 @@ export function FinishSheet({
       fatigue,
       soreness,
       comment: comment.trim() || undefined,
-    });
+    };
+
+    setSaving(true);
+    setError(null);
+
+    // Las series que quedaran pendientes van primero: el servidor calcula el
+    // volumen de la sesión con lo que tiene guardado, así que cerrarla antes de
+    // enviarlas daría un resumen corto.
+    await flushOutbox();
+
+    let result;
+    try {
+      result = await finishSessionAction(payload);
+    } catch {
+      // Sin red. Se guarda el cierre y se avisa sin adornos.
+      enqueueFinish(payload);
+      setSaving(false);
+      setQueued(true);
+      onQueued();
+      return;
+    }
+
     setSaving(false);
     if (result.status !== 'success' || !result.summary) {
       setError(result.message ?? 'No se ha podido cerrar la sesión.');
@@ -62,6 +90,32 @@ export function FinishSheet({
     }
     setSummary(result.summary);
     onFinished();
+  }
+
+  if (queued) {
+    return (
+      <Modal open={open} onClose={() => router.push('/player')} title="Entrenamiento guardado en el móvil">
+        <div className="space-y-5">
+          <div className="flex items-start gap-3 rounded-2xl border border-amber-glow/30 bg-amber-glow/10 p-4">
+            <CloudOff className="mt-0.5 h-5 w-5 shrink-0 text-amber-glow" />
+            <div className="text-sm text-ink-200">
+              <p className="font-medium text-amber-glow">Todavía no ha llegado a tu entrenador.</p>
+              <p className="mt-1 text-ink-300">
+                No hay conexión. El entrenamiento está guardado en este móvil y se enviará solo en cuanto
+                vuelva la cobertura. No cierres sesión hasta entonces.
+              </p>
+            </div>
+          </div>
+          <p className="text-sm text-ink-400">
+            El resumen con el volumen y los récords se calcula al enviarlo, así que lo verás luego en tu
+            historial.
+          </p>
+          <Button size="lg" className="w-full" onClick={() => router.push('/player')}>
+            Volver al inicio
+          </Button>
+        </div>
+      </Modal>
+    );
   }
 
   if (summary) {

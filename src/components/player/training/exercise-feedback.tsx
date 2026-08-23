@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Check, Loader2, MessageSquare } from 'lucide-react';
 import { saveExerciseCommentAction, saveSessionVideoAction } from '@/lib/actions/player';
+import { enqueueComment } from '@/lib/offline/outbox';
 import type { MediaMode } from '@/lib/media/types';
 import { VideoPlayer } from '@/components/media/video-player';
 import { VideoUpload } from '@/components/media/video-upload';
@@ -17,11 +18,13 @@ import { VideoUpload } from '@/components/media/video-upload';
  * mirando el botón hasta que acabe.
  */
 export function ExerciseFeedback({
+  sessionId,
   sessionExerciseId,
   initialComment,
   initialVideoUrl,
   mediaMode,
 }: {
+  sessionId: string;
   sessionExerciseId: string;
   initialComment: string | null;
   initialVideoUrl: string | null;
@@ -45,11 +48,23 @@ export function ExerciseFeedback({
 
   async function save() {
     setStatus('saving');
-    const result = await saveExerciseCommentAction({
-      sessionExerciseId,
-      comment: comment.trim() || null,
-      videoUrl: videoUrl.trim() || null,
-    });
+    const texto = comment.trim() || null;
+
+    let result;
+    try {
+      result = await saveExerciseCommentAction({
+        sessionExerciseId,
+        comment: texto,
+        videoUrl: videoUrl.trim() || null,
+      });
+    } catch {
+      // Sin red: se guarda en el móvil y se envía con el resto.
+      enqueueComment({ sessionId, sessionExerciseId, comment: texto });
+      setStatus('saved');
+      setMessage('Guardado en el móvil. Se enviará al recuperar conexión.');
+      return;
+    }
+
     if (result.status === 'success') {
       setStatus('saved');
       setMessage(null);
@@ -118,7 +133,7 @@ export function ExerciseFeedback({
           {status === 'saved' ? (
             <span className="flex items-center gap-1 text-xs font-medium text-success-500">
               <Check className="h-3.5 w-3.5" />
-              Enviado
+              {message ?? 'Enviado'}
             </span>
           ) : null}
           {status === 'error' && message ? <span className="text-xs text-danger-500">{message}</span> : null}

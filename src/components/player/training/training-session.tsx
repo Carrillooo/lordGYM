@@ -16,7 +16,9 @@ import {
 import type { ExerciseCategory, SetStatus } from '@/types/db';
 import type { MediaMode } from '@/lib/media/types';
 import { logSetAction } from '@/lib/actions/player';
-import { clearSession, dequeue, enqueue, pending } from '@/lib/offline/queue';
+import { clearSession, enqueueSet, pendingCount, remove } from '@/lib/offline/outbox';
+import { flushOutbox } from '@/lib/offline/sync';
+import { useOnline } from '@/hooks/use-online';
 import { primeAlertSound } from '@/lib/alert-sound';
 import { useStoredFlag } from '@/hooks/use-stored-flag';
 import { useWakeLock } from '@/hooks/use-wake-lock';
@@ -100,6 +102,7 @@ export function TrainingSession({
   // pierde. La preferencia se recuerda de una sesión a otra.
   const [soundEnabled, setSoundEnabled] = useStoredFlag('lordgym.rest-sound', true);
   const [offlineCount, setOfflineCount] = useState(0);
+  const online = useOnline();
   const [finishing, setFinishing] = useState(false);
   const [exiting, setExiting] = useState(false);
   const [prToast, setPrToast] = useState<{ exercise: string; value: string } | null>(null);
@@ -134,22 +137,9 @@ export function TrainingSession({
   }, [startedAt]);
 
   const flushQueue = useCallback(async () => {
-    const queued = pending(sessionId);
-    setOfflineCount(queued.length);
-    for (const entry of queued) {
-      const result = await logSetAction({
-        sessionId: entry.sessionId,
-        setId: entry.setId,
-        actualReps: entry.actualReps,
-        actualWeightKg: entry.actualWeightKg,
-        actualDurationSeconds: entry.actualDurationSeconds,
-        actualDistanceM: entry.actualDistanceM,
-        rpe: entry.rpe,
-        status: entry.status,
-      });
-      if (result.status === 'success') dequeue(sessionId, entry.setId);
-    }
-    setOfflineCount(pending(sessionId).length);
+    setOfflineCount(pendingCount(sessionId));
+    await flushOutbox();
+    setOfflineCount(pendingCount(sessionId));
   }, [sessionId]);
 
   // Reintento al recuperar conexión (§65). El primer vaciado se programa fuera
@@ -180,8 +170,12 @@ export function TrainingSession({
     setState((currentState) => ({ ...currentState, [setId]: { ...currentState[setId], ...changes } }));
   }
 
+  /**
+   * Guarda la serie. Primero en el móvil y después en el servidor, nunca al
+   * revés: si se corta la red a mitad, lo apuntado no se pierde.
+   */
   async function persist(setId: string, next: SetState) {
-    enqueue({
+    const payload = {
       sessionId,
       setId,
       actualReps: next.reps,
@@ -190,21 +184,19 @@ export function TrainingSession({
       actualDistanceM: next.distance,
       rpe: next.rpe,
       status: next.status,
-    });
-    setOfflineCount(pending(sessionId).length);
+    };
+    enqueueSet(payload);
+    setOfflineCount(pendingCount(sessionId));
 
-    const result = await logSetAction({
-      sessionId,
-      setId,
-      actualReps: next.reps,
-      actualWeightKg: next.weight,
-      actualDurationSeconds: next.duration,
-      actualDistanceM: next.distance,
-      rpe: next.rpe,
-      status: next.status,
-    });
-    if (result.status === 'success') dequeue(sessionId, setId);
-    setOfflineCount(pending(sessionId).length);
+    try {
+      const result = await logSetAction(payload);
+      // Un rechazo del servidor no se reintenta: la respuesta no va a cambiar.
+      if (result.status === 'error') console.warn('[lordgym] serie rechazada:', result.message);
+      remove(`set:${setId}`);
+    } catch {
+      // Sin red. Se queda en la bandeja de salida y se enviará al volver.
+    }
+    setOfflineCount(pendingCount(sessionId));
   }
 
   function toggleSet(setId: string) {
@@ -274,11 +266,16 @@ export function TrainingSession({
         </div>
       </header>
 
-      {offlineCount > 0 ? (
+      {!online || offlineCount > 0 ? (
         <div className="mx-auto mt-3 flex max-w-2xl items-center gap-2 px-4">
-          <span className="flex items-center gap-2 rounded-xl border border-amber-glow/30 bg-amber-glow/10 px-3 py-2 text-xs text-amber-glow">
+          <span
+            role="status"
+            className="flex items-center gap-2 rounded-xl border border-amber-glow/30 bg-amber-glow/10 px-3 py-2 text-xs text-amber-glow"
+          >
             <CloudOff className="h-3.5 w-3.5" />
-            {offlineCount} serie(s) guardadas en el móvil. Se sincronizan al recuperar conexión.
+            {online
+              ? `${offlineCount} cambio(s) guardado(s) en el móvil. Se envían al recuperar conexión.`
+              : 'Sin conexión. Sigue entrenando: todo se guarda en el móvil y se envía solo.'}
           </span>
         </div>
       ) : null}
@@ -522,6 +519,7 @@ export function TrainingSession({
 
           <ExerciseFeedback
             key={exercise.sessionExerciseId}
+            sessionId={sessionId}
             sessionExerciseId={exercise.sessionExerciseId}
             initialComment={exercise.athleteComment}
             initialVideoUrl={exercise.videoNote}
@@ -630,6 +628,7 @@ export function TrainingSession({
           // Los datos ya se revalidan desde la Server Action.
           clearSession(sessionId);
         }}
+        onQueued={() => setOfflineCount(pendingCount(sessionId))}
       />
 
       <ExitDialog open={exiting} onClose={() => setExiting(false)} sessionId={sessionId} />

@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/cn';
+import { OfflineSync } from '@/components/pwa/offline-sync';
 import { isActive, PLAYER_NAV } from './nav-config';
 
 /**
@@ -21,7 +22,10 @@ export function PlayerShell({ children, unreadCount }: { children: ReactNode; un
 
   return (
     <div className="safe-top min-h-dvh pb-[calc(4.5rem+var(--safe-bottom))] sm:pb-24">
-      <main className="mx-auto w-full max-w-2xl px-4 py-5 sm:px-6 sm:py-8">{children}</main>
+      <main className="mx-auto w-full max-w-2xl px-4 py-5 sm:px-6 sm:py-8">
+        <OfflineSync />
+        {children}
+      </main>
 
       <nav
         aria-label="Navegación"

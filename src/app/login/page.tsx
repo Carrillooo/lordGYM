@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { getCurrentUser } from '@/lib/auth/session';
 import { Wordmark } from '@/components/brand/wordmark';
 import { LoginForm } from '@/components/auth/login-form';
+import { PrivateCacheReset } from '@/components/pwa/private-cache-reset';
 
 export const metadata = { title: 'Iniciar sesión' };
 
@@ -21,6 +22,7 @@ export default async function LoginPage({
 
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center px-5 py-10">
+      <PrivateCacheReset />
       <div className="w-full max-w-sm">
         <Link
           href="/"
