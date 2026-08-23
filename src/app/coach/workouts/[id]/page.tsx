@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Copy, Layers, Timer, Trash2 } from 'lucide-react';
+import { ArrowLeft, Copy, Download, Layers, Timer, Trash2 } from 'lucide-react';
 import { requireCoach } from '@/lib/auth/guards';
 import { getWorkoutDetail } from '@/lib/services/workouts';
 import { listExercisesForCoach } from '@/lib/services/exercises';
@@ -36,6 +36,13 @@ export default async function WorkoutBuilderPage({ params }: { params: Promise<{
         </Link>
 
         <div className="flex gap-2">
+          <a
+            href={`/coach/workouts/${detail.workout.id}/pdf`}
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-ink-700 px-3 text-xs font-medium text-ink-200 transition-colors hover:border-ink-600"
+          >
+            <Download className="h-3.5 w-3.5" />
+            PDF
+          </a>
           <form action={duplicateWorkoutAction}>
             <input type="hidden" name="workoutId" value={detail.workout.id} />
             <button

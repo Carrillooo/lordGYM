@@ -103,7 +103,7 @@ export function ChatThread({
         </div>
 
         <details className="text-xs text-ink-500">
-          <summary className="cursor-pointer select-none">Adjuntar imagen o vídeo (URL)</summary>
+          <summary className="flex h-11 cursor-pointer select-none items-center">Adjuntar imagen o vídeo (URL)</summary>
           <div className="mt-2 flex gap-2">
             <input
               name="attachmentUrl"

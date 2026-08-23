@@ -54,7 +54,7 @@ export function BodyMap({
   return (
     <svg
       viewBox="0 0 200 420"
-      className="mx-auto h-auto w-full max-w-[240px]"
+      className="mx-auto h-auto w-full max-w-[320px] sm:max-w-[240px]"
       role="group"
       aria-label="Silueta del cuerpo para marcar molestias"
     >

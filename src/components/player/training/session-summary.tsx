@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, Trophy } from 'lucide-react';
+import { ArrowLeft, Download, Trophy } from 'lucide-react';
 import type { SessionDetail } from '@/lib/services/sessions';
 import type { PersonalRecordRow } from '@/types/db';
 import { formatDuration, formatLongDate } from '@/lib/domain/datetime';
@@ -149,6 +149,13 @@ export function SessionSummary({
         <ButtonLink href="/player/progress" variant="secondary" size="lg" className="w-full">
           Ver mi progreso
         </ButtonLink>
+        <a
+          href={`/player/workout/${detail.session.id}/pdf`}
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-ink-700 text-sm font-medium text-ink-300 transition-colors active:bg-ink-800 sm:col-span-2"
+        >
+          <Download className="h-4 w-4" />
+          Descargar esta sesión en PDF
+        </a>
       </div>
     </div>
   );

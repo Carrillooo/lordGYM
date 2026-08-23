@@ -128,6 +128,23 @@ momento**, sin que nadie tenga que subir nada.
 
 ---
 
+## PDF imprimible
+
+`lib/pdf/` genera con `pdf-lib` la hoja de entrenamiento en A4, servida desde
+tres manejadores de ruta: la plantilla del entrenador, la rutina asignada al
+jugador antes de hacerla y la sesión ya cerrada. Las dos primeras salen con
+casillas en blanco para apuntar a mano; la tercera, con lo que se registró.
+
+Las ilustraciones se dibujan con las **mismas coordenadas** que en pantalla, con
+las primitivas vectoriales de pdf-lib: papel y aplicación enseñan lo mismo. Se
+invierten los tonos —fondo blanco, trazo oscuro— porque es lo que se imprime
+bien, y se omiten las flechas de ayuda, que en papel sólo restan legibilidad.
+
+La autorización va antes de generar nada: un entrenador sólo descarga sus
+entrenamientos y un jugador sólo sus sesiones.
+
+---
+
 ## Autenticación y autorización
 
 Ver [`SECURITY.md`](SECURITY.md). En resumen:

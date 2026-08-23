@@ -46,7 +46,7 @@ export default async function PlayerCalendarPage({
         <div className="mb-3 flex items-center justify-between">
           <Link
             href={`/player/calendar?month=${previousMonth}`}
-            className="rounded-lg px-2.5 py-1.5 text-sm text-ink-300 hover:bg-ink-800"
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-lg text-ink-300 active:bg-ink-800"
           >
             ←
           </Link>
@@ -55,7 +55,7 @@ export default async function PlayerCalendarPage({
           </p>
           <Link
             href={`/player/calendar?month=${nextMonth}`}
-            className="rounded-lg px-2.5 py-1.5 text-sm text-ink-300 hover:bg-ink-800"
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-lg text-ink-300 active:bg-ink-800"
           >
             →
           </Link>
@@ -91,7 +91,7 @@ export default async function PlayerCalendarPage({
                 <span className={cn('tabular text-xs', date === today ? 'text-volt-500' : 'text-ink-300')}>
                   {Number(date.slice(8))}
                 </span>
-                <span aria-hidden className="text-[10px] leading-none">
+                <span aria-hidden className="text-[11px] leading-none">
                   {items.length === 0 ? (
                     <span className="text-ink-700">○</span>
                   ) : completed ? (

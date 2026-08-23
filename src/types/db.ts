@@ -49,6 +49,8 @@ export type ExerciseCategory =
   | 'triceps'
   | 'pierna'
   | 'core'
+  | 'calistenia'
+  | 'gimnasio'
   | 'movilidad'
   | 'pliometria'
   | 'velocidad'

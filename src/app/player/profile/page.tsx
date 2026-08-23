@@ -57,7 +57,7 @@ export default async function PlayerProfilePage() {
             <Link
               href="/player/messages"
               aria-label="Escribir a tu entrenador"
-              className="rounded-lg border border-ink-700 p-2 text-ink-300 transition-colors hover:border-volt-500 hover:text-volt-500"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-ink-700 text-ink-300 transition-colors hover:border-volt-500 hover:text-volt-500"
             >
               <MessageSquare className="h-4 w-4" />
             </Link>

@@ -15,7 +15,8 @@ const VARIANTS: Record<ButtonVariant, string> = {
 };
 
 const SIZES: Record<ButtonSize, string> = {
-  sm: 'h-9 px-3 text-sm rounded-lg gap-1.5',
+  // 44 px en el móvil (lo que acierta un dedo) y 36 en pantallas grandes.
+  sm: 'h-11 sm:h-9 px-3 text-sm rounded-lg gap-1.5',
   md: 'h-11 px-4 text-sm rounded-xl gap-2',
   lg: 'h-13 px-6 text-base rounded-xl gap-2',
   xl: 'h-16 px-8 text-lg rounded-2xl gap-3',

@@ -1,6 +1,6 @@
 # Estado del proyecto
 
-Última actualización: ilustraciones por ejercicio y retirada de los datos de demostración.
+Última actualización: calistenia y gimnasio, PDF imprimible y repaso del móvil.
 
 ## Verificación
 
@@ -147,6 +147,27 @@ asigna a Adrián; el jugador lo ve, entrena con la ilustración y la explicació
 delante y registra las series. Cero errores de consola y cero respuestas 5xx.
 El cambio de contraseña también: rechaza la actual incorrecta, y tras cambiarla
 la antigua deja de servir y la nueva funciona.
+
+---
+
+## Biblioteca, PDF y móvil
+
+La biblioteca pasa de 48 a **94 ejercicios**: calistenia (muscle-up, front lever,
+planche, bandera, pino, L-sit, pistol…) y sala de máquinas (prensa, extensión y
+curl femoral, contractora, cruce de poleas, predicador, press francés…). Todos
+con su ilustración y su explicación, como los anteriores. Dos categorías nuevas,
+Calistenia y Gimnasio, para filtrarlos.
+
+**PDF imprimible** en tres sitios: la plantilla del entrenador, la rutina que el
+jugador tiene asignada —antes de hacerla, con casillas en blanco para apuntar a
+mano— y la sesión ya cerrada, con los resultados. Con las ilustraciones dibujadas
+en vectorial.
+
+**Repaso del móvil** medido en un iPhone de 390 px: ninguna pantalla desborda en
+horizontal, no queda ninguna zona táctil por debajo de 44 px, los campos de kg,
+reps y RPE miden 48 px y abren el teclado numérico, y el mapa de dolor tiene
+ahora un desplegable alternativo, porque sus zonas no pueden ser todas grandes
+sin destrozar el dibujo.
 
 ---
 

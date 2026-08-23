@@ -496,7 +496,7 @@ export function TrainingSession({
 
           {exercise.technique || exercise.description ? (
             <details className="mt-4 text-sm">
-              <summary className="cursor-pointer select-none text-xs font-medium uppercase tracking-wider text-ink-500">
+              <summary className="flex h-11 cursor-pointer select-none items-center text-xs font-medium uppercase tracking-wider text-ink-500">
                 Cómo se hace
               </summary>
               <div className="mt-3 space-y-3">

@@ -22,7 +22,7 @@ por defecto es un fichero JSON (`.lordgym-data/db.json`) que se siembra sola.
 
 ### Cuentas
 
-El primer arranque crea **la biblioteca de 48 ejercicios, las 13 pruebas físicas
+El primer arranque crea **la biblioteca de 94 ejercicios, las 13 pruebas físicas
 y dos cuentas vinculadas entre sí**. Nada más: ni sesiones inventadas, ni
 histórico de mentira, ni jugadores de relleno. El entrenador empieza con su
 plantilla y crea el primer entrenamiento él.

@@ -35,6 +35,7 @@ describeIfPostgres('driver de PostgreSQL', () => {
   it('crea el esquema, siembra el contenido inicial y recorre el ciclo completo', async () => {
     const { db, ensureDatabaseReady } = await import('@/lib/db');
     const { seedInitialData, COACH_EMAIL, ATHLETE_EMAIL } = await import('@/lib/seed');
+    const { EXERCISE_LIBRARY, TEST_LIBRARY } = await import('@/lib/seed/exercise-library');
     const { todayKey } = await import('@/lib/domain/datetime');
 
     // 1. El esquema se aplica solo.
@@ -46,7 +47,7 @@ describeIfPostgres('driver de PostgreSQL', () => {
     expect((await seedInitialData()).seeded).toBe(false);
 
     const exercises = await db().select('exercises', { owner_coach_id: null });
-    expect(exercises.length).toBe(48);
+    expect(exercises.length).toBe(EXERCISE_LIBRARY.length);
     // Las columnas de array vuelven como arrays, no como cadenas.
     expect(Array.isArray(exercises[0].muscles)).toBe(true);
     // Todos traen explicación e ilustración.
@@ -55,7 +56,7 @@ describeIfPostgres('driver de PostgreSQL', () => {
       expect(exercise.technique).toBeTruthy();
       expect(exercise.figure_key).toBeTruthy();
     }
-    expect((await db().select('tests', {})).length).toBe(13);
+    expect((await db().select('tests', {})).length).toBe(TEST_LIBRARY.length);
 
     // 3. Las dos cuentas reales, vinculadas y sin nada más.
     const [coachUser] = await db().select('users', { email: COACH_EMAIL });
@@ -174,7 +175,9 @@ describeIfPostgres('driver de PostgreSQL', () => {
     ).toBe(1);
     expect((await db().select('exercises', { owner_coach_id: { neq: null } })).length).toBe(0);
     // `in` que mezcla null con valores: lo usa la biblioteca de ejercicios.
-    expect((await db().select('exercises', { owner_coach_id: { in: [null, coach.id] } })).length).toBe(48);
+    expect((await db().select('exercises', { owner_coach_id: { in: [null, coach.id] } })).length).toBe(
+      EXERCISE_LIBRARY.length,
+    );
 
     // 9. Orden y límite.
     const ordenadas = await db().select(

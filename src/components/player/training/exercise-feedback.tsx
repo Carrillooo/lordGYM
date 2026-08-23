@@ -42,7 +42,7 @@ export function ExerciseFeedback({
 
   return (
     <details className="mt-4 rounded-xl border border-ink-800 bg-ink-900/40 px-3 py-2.5">
-      <summary className="flex cursor-pointer select-none items-center gap-2 text-xs font-medium uppercase tracking-wider text-ink-400">
+      <summary className="flex h-11 cursor-pointer select-none items-center gap-2 text-xs font-medium uppercase tracking-wider text-ink-400">
         <MessageSquare className="h-3.5 w-3.5" />
         Comentario o vídeo para tu entrenador
         {initialComment || initialVideoUrl ? <span className="text-volt-500">·</span> : null}

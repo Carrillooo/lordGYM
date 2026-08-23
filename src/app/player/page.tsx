@@ -1,14 +1,5 @@
 import Link from 'next/link';
-import {
-  Activity,
-  ArrowRight,
-  Bell,
-  Flame,
-  HeartPulse,
-  MessageSquare,
-  PlayCircle,
-  TrendingUp,
-} from 'lucide-react';
+import { Activity, ArrowRight, Bell, Download, Flame, HeartPulse, MessageSquare, PlayCircle, TrendingUp } from 'lucide-react';
 import { requireAthlete } from '@/lib/auth/guards';
 import { athleteOverview } from '@/lib/services/progress';
 import { expireOverdueAssignments, nextAssignment, unfinishedSession } from '@/lib/services/assignments';
@@ -117,7 +108,7 @@ export default async function PlayerHomePage() {
               </p>
             ) : null}
 
-            <div className="mt-5">
+            <div className="mt-5 space-y-2">
               {next.session ? (
                 <ButtonLink href={`/player/workout/${next.session.id}`} size="xl" className="w-full">
                   <PlayCircle className="h-5 w-5" />
@@ -126,6 +117,13 @@ export default async function PlayerHomePage() {
               ) : (
                 <StartSessionButton assignmentId={next.assignment.id} />
               )}
+              <a
+                href={`/player/plan/${next.assignment.id}/pdf`}
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-ink-700 text-sm font-medium text-ink-300 transition-colors active:bg-ink-800"
+              >
+                <Download className="h-4 w-4" />
+                Descargar en PDF
+              </a>
             </div>
           </div>
         </Card>
@@ -177,7 +175,10 @@ export default async function PlayerHomePage() {
           }
           subtitle={checkIn ? 'Ya lo has completado. Puedes actualizarlo.' : 'Un minuto: ayuda a ajustar tus cargas.'}
           action={
-            <Link href="/player/wellness" className="text-xs font-medium text-volt-500 hover:underline">
+            <Link
+              href="/player/wellness"
+              className="-mr-2 flex h-11 items-center px-2 text-xs font-medium text-volt-500"
+            >
               {checkIn ? 'Editar' : 'Rellenar'}
             </Link>
           }

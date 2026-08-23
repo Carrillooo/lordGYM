@@ -37,6 +37,31 @@ export function PainForm({ today, history }: { today: string; history: PainLogRo
 
       <BodyMap selectedId={zone?.id ?? null} onSelect={setZone} marked={marked} />
 
+      {/*
+       * Las zonas de la silueta son pequeñas por fuerza: su sitio en el dibujo
+       * es lo que las identifica. Este desplegable es la vía alternativa —en el
+       * móvil abre el selector nativo— para quien no acierte con el dedo o
+       * navegue con teclado o lector de pantalla.
+       */}
+      <label className="mt-4 block">
+        <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-ink-400">
+          O elige la zona de la lista
+        </span>
+        <select
+          value={zone?.id ?? ''}
+          onChange={(event) => setZone(BODY_ZONES.find((item) => item.id === event.target.value) ?? null)}
+          className="h-11 w-full rounded-xl border border-ink-700 bg-ink-900 px-3 text-ink-50 focus:border-volt-500 focus:outline-none"
+        >
+          <option value="">Sin seleccionar</option>
+          {BODY_ZONES.map((item) => (
+            <option key={item.id} value={item.id}>
+              {item.label}
+              {item.side !== 'central' ? ` (${item.side})` : ''}
+            </option>
+          ))}
+        </select>
+      </label>
+
       <form action={formAction} className="mt-5 space-y-4">
         <input type="hidden" name="date" value={today} />
         <input type="hidden" name="bodyPart" value={zone?.label ?? ''} />

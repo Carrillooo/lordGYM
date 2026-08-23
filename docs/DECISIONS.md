@@ -243,3 +243,20 @@ abre la aplicación quiere su plantilla, no la de un ejemplo.
 **Qué se pierde.** La portada ya no se puede enseñar con las gráficas llenas.
 A cambio, todo lo que aparece en pantalla ha ocurrido de verdad, que es la
 primera regla del proyecto.
+
+
+---
+
+## 16. El PDF se genera en el servidor, no se imprime desde el navegador
+
+**Decisión.** Componer el documento con `pdf-lib` y servirlo como descarga, en
+lugar de una hoja de estilos de impresión y `window.print()`.
+
+**Por qué.** En el iPhone, imprimir desde el navegador abre la hoja del sistema y
+obliga a buscar «Guardar en Archivos»; y el resultado depende de los márgenes del
+navegador. Un PDF servido se descarga de una vez, sale idéntico en cualquier
+dispositivo y puede llevar las ilustraciones dibujadas como vectores, que era el
+punto: la hoja que te llevas al gimnasio enseña lo mismo que la pantalla.
+
+**Qué se pierde.** Una dependencia más y unos 100 kB en el servidor. A cambio no
+hay que mantener un segundo juego de estilos sólo para el papel.
