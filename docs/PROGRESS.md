@@ -1,6 +1,6 @@
 # Estado del proyecto
 
-Última actualización: ilustraciones animadas y 128 ejercicios.
+Última actualización: catálogo completo de wger (932 ejercicios) y puesta al día de bases ya sembradas.
 
 ## Verificación
 
@@ -189,6 +189,25 @@ press estrecho y declinado, aperturas, curl con barra y en polea, remo en T,
 jalón estrecho, hiperextensiones, sentadilla hack y sumo, swing con kettlebell,
 press Arnold… Los textos son propios; de wger se tomó qué cubrir, no su
 contenido. El porqué está en [`DECISIONS.md`](DECISIONS.md) §17 y §18.
+
+---
+
+## Catálogo completo y bases ya sembradas
+
+La biblioteca pasa de 128 a **932 ejercicios**: los 128 escritos a mano —con sus
+pautas técnicas— más 804 importados del catálogo abierto de
+[wger](https://github.com/wger-project/wger) (CC-BY-SA). Cada uno con la
+ilustración de su patrón de movimiento; ninguno se queda con un dibujo genérico.
+
+**wger no distribuye sus imágenes con el código**: sólo publica el catálogo. Las
+fotos viven en su servidor. Por eso los 932 usan el sistema de figuras propio.
+
+Y lo más importante para una instalación que ya esté en marcha: `app_state.seed`
+guarda ahora una **versión**, y al arrancar con una distinta la base se pone al
+día sola. Retira el equipo de demostración, limpia el historial inventado del
+jugador, se asegura de que existe la cuenta del entrenador y actualiza la
+biblioteca. Sin tocar datos de usuarios reales, cosa que hay un test que lo
+comprueba. Detalle en [`ARCHITECTURE.md`](ARCHITECTURE.md).
 
 ---
 

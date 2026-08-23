@@ -1,16 +1,25 @@
 import type { ExerciseCategory, MetricType } from '@/types/db';
 
 export interface SeedExercise {
-  /** Clave estable para referenciar el ejercicio desde las sesiones demo. */
+  /** Clave estable del ejercicio dentro de la biblioteca. */
   slug: string;
   name: string;
   category: ExerciseCategory;
   metricType: MetricType;
-  movementType: string;
+  movementType: string | null;
   muscles: string[];
   equipment: string[];
   description: string;
-  technique: string;
+  /**
+   * Indicaciones de ejecución. Sólo las llevan los ejercicios escritos a mano:
+   * no se inventan pautas técnicas para los importados.
+   */
+  technique: string | null;
+  /**
+   * Ilustración. Si falta se usa el `slug`, que es lo que hacen los ejercicios
+   * propios; los importados traen directamente la clave de la postura.
+   */
+  figureKey?: string;
 }
 
 /**

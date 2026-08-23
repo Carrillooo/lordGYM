@@ -184,14 +184,36 @@ let schemaPromise: Promise<void> | null = null;
  * ejecutarlo en cada arranque; se memoriza por proceso para no repetirlo.
  */
 export function ensurePostgresSchema(): Promise<void> {
-  schemaPromise ??= getPool()
-    .query(POSTGRES_SCHEMA)
-    .then(() => undefined)
-    .catch((error) => {
-      schemaPromise = null;
-      throw error;
-    });
+  schemaPromise ??= applySchema().catch((error) => {
+    schemaPromise = null;
+    throw error;
+  });
   return schemaPromise;
+}
+
+/**
+ * `create extension if not exists` no es atómico entre procesos: si dos
+ * instancias arrancan a la vez —lo normal en Vercel, y también durante el
+ * prerenderizado del build— una de las dos choca contra la clave única del
+ * catálogo. No es un error real: la otra ya lo ha creado.
+ *
+ * Como todo el esquema es `if not exists`, basta con reintentar una vez: en el
+ * segundo pase ya está todo y no queda nada que crear.
+ */
+async function applySchema(): Promise<void> {
+  try {
+    await getPool().query(POSTGRES_SCHEMA);
+  } catch (error) {
+    if (!isConcurrentCreate(error)) throw error;
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    await getPool().query(POSTGRES_SCHEMA);
+  }
+}
+
+/** 23505 = clave duplicada, 42710 = el objeto ya existe, 42P07 = la tabla ya existe. */
+function isConcurrentCreate(error: unknown): boolean {
+  const code = (error as { code?: string } | null)?.code;
+  return code === '23505' || code === '42710' || code === '42P07';
 }
 
 /* --------------------------------------------------------------------------

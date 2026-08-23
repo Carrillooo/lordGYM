@@ -3,7 +3,9 @@ import { db, ensureDatabaseReady } from '@/lib/db';
 import { hashPassword } from '@/lib/auth/password';
 import { newId } from '@/lib/domain/ids';
 import { nowIso } from '@/lib/domain/datetime';
-import { EXERCISE_LIBRARY, TEST_LIBRARY } from './exercise-library';
+import { EXERCISE_LIBRARY, TEST_LIBRARY, type SeedExercise } from './exercise-library';
+import { WGER_LIBRARY } from './wger-library';
+import { limpiarHistorial, purgarDemo, reconciliarBiblioteca } from './reconcile';
 import type { AthleteRow, CoachRow, ExerciseRow, ProfileRow, TestRow, UserRow } from '@/types/db';
 
 /**
@@ -20,6 +22,22 @@ export const ATHLETE_EMAIL = 'adrian@lordgym.app';
 export const COACH_CODE = 'LORD-A7K29';
 
 const SEED_KEY = 'seed';
+
+/**
+ * Versión del contenido sembrado.
+ *
+ * `app_state.seed` guarda con qué versión se sembró una base. Al arrancar, si
+ * no coincide con ésta, se reconcilia: es lo que permite que una instalación ya
+ * desplegada reciba los cambios del catálogo en vez de quedarse congelada en la
+ * versión del día que se desplegó. Súbela cuando cambie lo que se siembra.
+ */
+const SEED_VERSION = '3';
+
+/**
+ * Biblioteca completa: los ejercicios escritos a mano primero —con sus pautas
+ * técnicas— y detrás el catálogo importado de wger.
+ */
+export const FULL_LIBRARY: SeedExercise[] = [...EXERCISE_LIBRARY, ...WGER_LIBRARY];
 
 /**
  * Contraseña inicial de las dos cuentas. Se puede fijar en el entorno antes del
@@ -68,24 +86,36 @@ async function claimSeed(): Promise<boolean> {
   const [existing] = await db().select('app_state', { key: SEED_KEY });
   if (existing) return false;
   try {
-    await db().insert('app_state', { key: SEED_KEY, value: nowIso(), created_at: nowIso() });
+    await db().insert('app_state', { key: SEED_KEY, value: SEED_VERSION, created_at: nowIso() });
     return true;
   } catch {
     return false;
   }
 }
 
-/** Carga el contenido inicial. Es idempotente: sólo corre la primera vez. */
-export async function seedInitialData(): Promise<{ seeded: boolean }> {
-  // Con PostgreSQL el esquema se aplica solo si falta, antes de nada.
-  await ensureDatabaseReady();
-  if (!(await claimSeed())) return { seeded: false };
+/**
+ * Reclama la puesta al día, igual que `claimSeed` reclama el sembrado.
+ *
+ * En Vercel arrancan varias instancias a la vez y durante el build hay varios
+ * procesos de prerenderizado. Sin cerrojo, dos podrían reconciliar en paralelo y
+ * duplicar media biblioteca. La clave primaria de `app_state` hace de árbitro:
+ * sólo una inserción gana.
+ */
+async function claimReconcile(): Promise<boolean> {
+  const key = `${SEED_KEY}:${SEED_VERSION}`;
+  const [existing] = await db().select('app_state', { key });
+  if (existing) return false;
+  try {
+    await db().insert('app_state', { key, value: nowIso(), created_at: nowIso() });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
-  const createdAt = nowIso();
-
-  // --- Biblioteca de ejercicios -------------------------------------------
-  // `figure_key` es el slug: de ahí sale la ilustración de cada ejercicio.
-  const exerciseRows: ExerciseRow[] = EXERCISE_LIBRARY.map((seed) => ({
+/** Fila de `exercises` a partir de una entrada de la biblioteca. */
+function exerciseRow(seed: SeedExercise, createdAt: string): ExerciseRow {
+  return {
     id: newId(),
     owner_coach_id: null,
     name: seed.name,
@@ -98,9 +128,145 @@ export async function seedInitialData(): Promise<{ seeded: boolean }> {
     technique: seed.technique,
     video_url: null,
     image_url: null,
-    figure_key: seed.slug,
+    figure_key: seed.figureKey ?? seed.slug,
     created_at: createdAt,
-  }));
+  };
+}
+
+/**
+ * Pone al día una base sembrada con una versión anterior.
+ *
+ * Retira el equipo de demostración que llegó a desplegarse, deja al jugador con
+ * su historial limpio, se asegura de que el entrenador existe con el correo
+ * correcto y actualiza la biblioteca global.
+ */
+async function reconcile(): Promise<void> {
+  const createdAt = nowIso();
+
+  const borradas = await purgarDemo();
+  if (borradas > 0) console.log(`[lordgym] retiradas ${borradas} cuentas de demostración`);
+
+  const biblioteca = await reconciliarBiblioteca(
+    FULL_LIBRARY.map((seed) => ({
+      name: seed.name,
+      category: seed.category,
+      metricType: seed.metricType,
+      movementType: seed.movementType,
+      muscles: seed.muscles,
+      equipment: seed.equipment,
+      description: seed.description,
+      technique: seed.technique,
+      figureKey: seed.figureKey ?? seed.slug,
+    })),
+    (seed) => exerciseRow(seed as unknown as SeedExercise, createdAt) as unknown as Record<string, unknown>,
+  );
+  console.log(
+    `[lordgym] biblioteca: +${biblioteca.añadidos} nuevos, ${biblioteca.actualizados} actualizados, ` +
+      `-${biblioteca.retirados} retirados`,
+  );
+
+  // Las pruebas físicas que falten.
+  const pruebas = await db().select('tests', { coach_id: null });
+  const tengo = new Set(pruebas.map((row) => row.name.toLowerCase()));
+  const faltan = TEST_LIBRARY.filter((seed) => !tengo.has(seed.name.toLowerCase()));
+  if (faltan.length > 0) {
+    await db().insertMany(
+      'tests',
+      faltan.map((seed) => ({
+        id: newId(),
+        coach_id: null,
+        name: seed.name,
+        unit: seed.unit,
+        category: seed.category,
+        lower_is_better: seed.lowerIsBetter,
+      })),
+    );
+  }
+
+  // El entrenador. Si la base se sembró con el correo antiguo, esa cuenta ya se
+  // ha ido con la purga: aquí se crea la buena.
+  let [coachUser] = await db().select('users', { email: COACH_EMAIL });
+  if (!coachUser) {
+    coachUser = await createUser(COACH_EMAIL, 'Josep', 'Sobervia', null, 'coach', createdAt);
+    console.log('[lordgym] creada la cuenta del entrenador');
+  }
+  let [coach] = await db().select('coaches', { user_id: coachUser.id });
+  if (!coach) {
+    coach = {
+      id: newId(),
+      user_id: coachUser.id,
+      coach_code: COACH_CODE,
+      org_name: 'LORDGYM',
+      staff_role: 'head_coach',
+      created_at: createdAt,
+    };
+    await db().insert('coaches', coach);
+  }
+
+  // El jugador, con el historial de demostración fuera.
+  let [athleteUser] = await db().select('users', { email: ATHLETE_EMAIL });
+  if (!athleteUser) {
+    athleteUser = await createUser(ATHLETE_EMAIL, 'Adrián', 'Carrillo', null, 'athlete', createdAt);
+  }
+  let [athlete] = await db().select('athletes', { user_id: athleteUser.id });
+  if (!athlete) {
+    athlete = {
+      id: newId(),
+      user_id: athleteUser.id,
+      sport: null,
+      position: null,
+      team_name: null,
+      height_cm: null,
+      weight_kg: null,
+      laterality: null,
+      goals: null,
+      injuries: null,
+      notes: null,
+      created_at: createdAt,
+    };
+    await db().insert('athletes', athlete);
+  } else {
+    await limpiarHistorial(athlete.id);
+    console.log('[lordgym] historial de demostración del jugador retirado');
+  }
+
+  const [vinculo] = await db().select('coach_athletes', { coach_id: coach.id, athlete_id: athlete.id });
+  if (!vinculo) {
+    await db().insert('coach_athletes', {
+      id: newId(),
+      coach_id: coach.id,
+      athlete_id: athlete.id,
+      status: 'active',
+      requested_at: createdAt,
+      responded_at: createdAt,
+    });
+  }
+}
+
+/** Carga el contenido inicial. Es idempotente: sólo corre la primera vez. */
+export async function seedInitialData(): Promise<{ seeded: boolean }> {
+  // Con PostgreSQL el esquema se aplica solo si falta, antes de nada.
+  await ensureDatabaseReady();
+
+  if (!(await claimSeed())) {
+    // Ya estaba sembrada. Si lo fue con otra versión, se pone al día.
+    const [estado] = await db().select('app_state', { key: SEED_KEY });
+    if (estado && estado.value !== SEED_VERSION && (await claimReconcile())) {
+      console.log(`[lordgym] poniendo al día el contenido (${estado.value} -> ${SEED_VERSION})`);
+      await reconcile();
+      // `app_state` se identifica por `key`, no por `id`, y el driver actualiza
+      // por identificador: se reemplaza la fila. Sólo llega aquí quien ganó el
+      // cerrojo, así que no hay dos procesos escribiéndola a la vez.
+      await db().removeWhere('app_state', { key: SEED_KEY });
+      await db().insert('app_state', { key: SEED_KEY, value: SEED_VERSION, created_at: nowIso() });
+    }
+    return { seeded: false };
+  }
+
+  const createdAt = nowIso();
+
+  // --- Biblioteca de ejercicios -------------------------------------------
+  const exerciseRows: ExerciseRow[] = FULL_LIBRARY.map((seed) => exerciseRow(seed, createdAt));
   await db().insertMany('exercises', exerciseRows);
 
   const testRows: TestRow[] = TEST_LIBRARY.map((seed) => ({

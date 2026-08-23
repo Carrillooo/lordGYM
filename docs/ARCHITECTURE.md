@@ -145,6 +145,30 @@ entrenamientos y un jugador sólo sus sesiones.
 
 ---
 
+## Versión del sembrado
+
+El sembrado sólo corre contra una base vacía, lo que evita duplicar y evita
+pisar datos reales. Pero deja un agujero: una instalación ya desplegada se queda
+congelada en la versión del día que se sembró, aunque el código cambie después.
+Es lo que pasó con el equipo de demostración: se retiró del código y siguió vivo
+en las bases que ya lo tenían.
+
+Por eso `app_state.seed` guarda una **versión**. Al arrancar, si no coincide con
+la del código, `seed/reconcile.ts` pone la base al día: retira las cuentas de
+demostración (identificadas por su correo exacto), limpia el historial inventado
+y actualiza la biblioteca global —añade lo que falta, refresca lo que cambió y
+retira lo que ya no está, pero sólo si ningún entrenamiento lo usa.
+
+Es deliberadamente conservador: no toca ni una fila de un usuario real. Hay un
+test que lo demuestra creando un club de verdad junto a la demostración y
+comprobando que sobrevive intacto.
+
+La puesta al día se reclama con la misma inserción atómica que el sembrado: en
+Vercel arrancan varias instancias a la vez y sin cerrojo dos podrían reconciliar
+en paralelo.
+
+---
+
 ## Autenticación y autorización
 
 Ver [`SECURITY.md`](SECURITY.md). En resumen:
