@@ -60,7 +60,7 @@ export function CoachShell({
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[260px_1fr]">
       {/* Sidebar de escritorio */}
-      <aside className="sticky top-0 hidden h-dvh flex-col border-r border-ink-800 bg-ink-900/60 px-4 py-5 backdrop-blur lg:flex">
+      <aside className="sticky top-0 hidden h-dvh flex-col border-r border-ink-800 bg-ink-900/60 px-4 pb-5 pt-[calc(1.25rem+var(--safe-top))] backdrop-blur lg:flex">
         <Link href="/coach" className="mb-6 flex items-center gap-2.5 px-1">
           <LogoMark />
           <Wordmark size="sm" />
@@ -86,7 +86,7 @@ export function CoachShell({
 
       <div className="flex min-w-0 flex-col">
         {/* Barra superior móvil */}
-        <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-ink-800 bg-ink-950/85 px-4 py-3 backdrop-blur lg:hidden">
+        <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-ink-800 bg-ink-950/85 px-4 pb-3 pt-[calc(0.75rem+var(--safe-top))] backdrop-blur lg:hidden">
           <button
             type="button"
             onClick={() => setMenuOpen(true)}
@@ -128,7 +128,7 @@ export function CoachShell({
               onClick={() => setMenuOpen(false)}
               className="absolute inset-0 bg-ink-950/80 backdrop-blur-sm"
             />
-            <div className="animate-rise absolute inset-y-0 left-0 flex w-[82%] max-w-xs flex-col border-r border-ink-800 bg-ink-900 px-4 py-5">
+            <div className="animate-rise absolute inset-y-0 left-0 flex w-[82%] max-w-xs flex-col border-r border-ink-800 bg-ink-900 px-4 pb-5 pt-[calc(1.25rem+var(--safe-top))]">
               <div className="mb-6 flex items-center justify-between">
                 <Wordmark size="sm" />
                 <button

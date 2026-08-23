@@ -67,7 +67,50 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   /* Respeta el notch y la barra inferior del iPhone. */
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: var(--safe-bottom);
+  /* Y las muescas laterales al girar el móvil: aquí no pisa ningún relleno. */
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+}
+
+/*
+ * Áreas seguras del iPhone.
+ *
+ * El documento declara `viewport-fit: cover`, así que el lienzo llega hasta el
+ * borde físico de la pantalla. Sin estas separaciones el contenido queda por
+ * debajo de la barra de estado y de la isla dinámica —que es justo lo que
+ * pasaba: el título de cada pantalla salía cortado por arriba.
+ *
+ * Van en variables y no en `env()` suelto por dos razones: se escriben una vez
+ * y se pueden falsear en una prueba para comprobar que el diseño aguanta con
+ * una isla dinámica de verdad. En un navegador sin muescas todas valen 0 y no
+ * cambian nada.
+ */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/**
+ * Aparta el contenido de la barra de estado.
+ *
+ * Sólo para elementos sin relleno superior propio: es un `padding-top` y
+ * pisaría el que ya tuvieran. Donde haya uno, se suma con `calc()` en el propio
+ * elemento.
+ */
+.safe-top {
+  padding-top: var(--safe-top);
+}
+
+/**
+ * Los elementos fijos no siguen el flujo del documento, así que el relleno
+ * lateral del `body` no les llega: se apartan moviendo sus bordes.
+ */
+.safe-inset-x {
+  left: var(--safe-left);
+  right: var(--safe-right);
 }
 
 /* Tipografía de titulares: compacta y con tracking negativo. */

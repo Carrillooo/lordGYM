@@ -178,6 +178,31 @@ justo lo que se queda a medias en una función con límite de tiempo.
 
 ---
 
+## Áreas seguras del iPhone
+
+El documento declara `viewport-fit: cover`, así que el lienzo llega hasta el
+borde físico de la pantalla. Es lo que hace que la aplicación se vea a pantalla
+completa, y también lo que mete el contenido por debajo de la barra de estado y
+de la isla dinámica si no se compensa.
+
+Las cuatro separaciones viven en variables sobre `:root` (`--safe-top`,
+`--safe-bottom`, `--safe-left`, `--safe-right`), que por defecto valen
+`env(safe-area-inset-*)`. Se escriben una vez y, sobre todo, **se pueden falsear
+en una prueba**: dando a `--safe-top` los 59 px de un iPhone 15 Pro se comprueba
+en el navegador que ninguna pantalla queda tapada, algo que con `env()` suelto no
+se puede verificar porque Chromium no emula las muescas.
+
+Reparto de responsabilidades:
+
+- El eje horizontal se resuelve **una sola vez en el `body`**. Es flujo normal y
+  ahí no pisa el relleno de nadie.
+- `.safe-top` es un `padding-top`, así que sólo va en elementos que no tengan uno
+  propio; donde ya lo hay, se suma con `calc()` en el propio elemento.
+- Los elementos fijos no siguen el flujo, así que el relleno del `body` no les
+  llega: usan `.safe-inset-x`, que mueve sus bordes en lugar de rellenarlos.
+
+---
+
 ## Autenticación y autorización
 
 Ver [`SECURITY.md`](SECURITY.md). En resumen:

@@ -49,7 +49,7 @@ export function RestTimer({
     <div
       role="timer"
       aria-live="off"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-volt-500/25 bg-ink-900/95 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 backdrop-blur-lg"
+      className="safe-inset-x fixed bottom-0 z-40 border-t border-volt-500/25 bg-ink-900/95 px-4 pb-[calc(1rem+var(--safe-bottom))] pt-4 backdrop-blur-lg"
     >
       <div className="mx-auto flex max-w-2xl items-center gap-4">
         <div className="min-w-0 flex-1">

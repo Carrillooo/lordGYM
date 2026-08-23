@@ -20,12 +20,12 @@ export function PlayerShell({ children, unreadCount }: { children: ReactNode; un
   }
 
   return (
-    <div className="min-h-dvh pb-[calc(4.5rem+env(safe-area-inset-bottom))] sm:pb-24">
+    <div className="safe-top min-h-dvh pb-[calc(4.5rem+var(--safe-bottom))] sm:pb-24">
       <main className="mx-auto w-full max-w-2xl px-4 py-5 sm:px-6 sm:py-8">{children}</main>
 
       <nav
         aria-label="Navegación"
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-ink-800 bg-ink-950/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg"
+        className="safe-inset-x fixed bottom-0 z-40 border-t border-ink-800 bg-ink-950/90 pb-[var(--safe-bottom)] backdrop-blur-lg"
       >
         <ul className="mx-auto flex max-w-2xl items-stretch">
           {PLAYER_NAV.map((item) => {

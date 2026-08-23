@@ -233,7 +233,7 @@ export function TrainingSession({
 
   return (
     <div className="min-h-dvh pb-40">
-      <header className="sticky top-0 z-30 border-b border-ink-800 bg-ink-950/90 backdrop-blur-lg">
+      <header className="safe-top sticky top-0 z-30 border-b border-ink-800 bg-ink-950/90 backdrop-blur-lg">
         <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-3">
           <button
             type="button"
@@ -566,7 +566,7 @@ export function TrainingSession({
           onSkip={() => setRest(null)}
         />
       ) : (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-ink-800 bg-ink-950/90 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-lg">
+        <div className="safe-inset-x fixed bottom-0 z-30 border-t border-ink-800 bg-ink-950/90 px-4 pb-[calc(0.75rem+var(--safe-bottom))] pt-3 backdrop-blur-lg">
           <div className="mx-auto max-w-2xl">
             <button
               type="button"

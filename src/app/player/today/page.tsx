@@ -78,7 +78,7 @@ export default async function PlayerTodayPage() {
         </ol>
       </Card>
 
-      <div className="sticky bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-20">
+      <div className="sticky bottom-[calc(4.75rem+var(--safe-bottom))] z-20">
         {next.session ? (
           <ButtonLink href={`/player/workout/${next.session.id}`} size="xl" className="w-full uppercase tracking-wide">
             Continuar entrenamiento
