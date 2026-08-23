@@ -17,6 +17,9 @@ import type { ExerciseCategory, SetStatus } from '@/types/db';
 import type { MediaMode } from '@/lib/media/types';
 import { logSetAction } from '@/lib/actions/player';
 import { clearSession, dequeue, enqueue, pending } from '@/lib/offline/queue';
+import { primeAlertSound } from '@/lib/alert-sound';
+import { useStoredFlag } from '@/hooks/use-stored-flag';
+import { useWakeLock } from '@/hooks/use-wake-lock';
 import { formatDuration, formatShortDate } from '@/lib/domain/datetime';
 import { epley1RM } from '@/lib/domain/metrics';
 import { SET_TYPE_LABELS } from '@/lib/domain/labels';
@@ -93,12 +96,17 @@ export function TrainingSession({
   const [showVideo, setShowVideo] = useState(false);
   const [elapsed, setElapsed] = useState(() => Math.max(0, Math.floor((Date.now() - Date.parse(startedAt)) / 1000)));
   const [rest, setRest] = useState<{ seconds: number; key: number } | null>(null);
-  const [soundEnabled, setSoundEnabled] = useState(false);
+  // El aviso viene activado: en un gimnasio con música, la vibración sola se
+  // pierde. La preferencia se recuerda de una sesión a otra.
+  const [soundEnabled, setSoundEnabled] = useStoredFlag('lordgym.rest-sound', true);
   const [offlineCount, setOfflineCount] = useState(0);
   const [finishing, setFinishing] = useState(false);
   const [exiting, setExiting] = useState(false);
   const [prToast, setPrToast] = useState<{ exercise: string; value: string } | null>(null);
   const restKey = useRef(0);
+
+  // La pantalla no se apaga mientras se entrena.
+  useWakeLock(true);
 
   const [state, setState] = useState<Record<string, SetState>>(() => {
     const initial: Record<string, SetState> = {};
@@ -200,6 +208,10 @@ export function TrainingSession({
   }
 
   function toggleSet(setId: string) {
+    // Este toque es un gesto del usuario, que es lo único que le vale a iOS
+    // para dejar sonar el aviso del descanso más tarde. Ver `alert-sound.ts`.
+    primeAlertSound();
+
     const previous = state[setId];
     const nextStatus: SetStatus = previous.status === 'completed' ? 'pending' : 'completed';
     const next = { ...previous, status: nextStatus };
@@ -570,13 +582,6 @@ export function TrainingSession({
           </ul>
         </nav>
 
-        <button
-          type="button"
-          onClick={() => setSoundEnabled((value) => !value)}
-          className="text-xs text-ink-500 underline-offset-2 hover:underline"
-        >
-          Sonido al terminar el descanso: {soundEnabled ? 'activado' : 'desactivado'}
-        </button>
       </main>
 
       {rest ? (
@@ -584,6 +589,10 @@ export function TrainingSession({
           key={rest.key}
           seconds={rest.seconds}
           soundEnabled={soundEnabled}
+          onToggleSound={() => {
+            primeAlertSound();
+            setSoundEnabled(!soundEnabled);
+          }}
           onDone={() => setRest(null)}
           onSkip={() => setRest(null)}
         />
