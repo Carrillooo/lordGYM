@@ -198,7 +198,11 @@ export async function reconciliarBiblioteca(
     }
   }
 
-  if (nuevos.length > 0) await db().insertMany('exercises', nuevos as never);
+  // En tandas: casi mil filas en una sola sentencia es lo que se queda a medias
+  // en una función serverless con límite de tiempo.
+  for (let i = 0; i < nuevos.length; i += 150) {
+    await db().insertMany('exercises', nuevos.slice(i, i + 150) as never);
+  }
 
   // Retirada: sólo lo que nadie usa.
   const sobrantes = existentes.filter((row) => !enCodigo.has(row.name.toLowerCase()));

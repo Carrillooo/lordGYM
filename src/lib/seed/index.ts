@@ -101,8 +101,12 @@ async function claimSeed(): Promise<boolean> {
  * duplicar media biblioteca. La clave primaria de `app_state` hace de árbitro:
  * sólo una inserción gana.
  */
+function reconcileKey(): string {
+  return `${SEED_KEY}:${SEED_VERSION}`;
+}
+
 async function claimReconcile(): Promise<boolean> {
-  const key = `${SEED_KEY}:${SEED_VERSION}`;
+  const key = reconcileKey();
   const [existing] = await db().select('app_state', { key });
   if (existing) return false;
   try {
@@ -110,6 +114,25 @@ async function claimReconcile(): Promise<boolean> {
     return true;
   } catch {
     return false;
+  }
+}
+
+/**
+ * Inserta en tandas.
+ *
+ * La biblioteca son casi mil filas y cada una lleva catorce columnas: en una
+ * sola sentencia son más de trece mil parámetros viajando a la base. Contra un
+ * PostgreSQL gestionado y desde una función serverless con límite de tiempo,
+ * eso es justo lo que se queda a medias. En tandas tarda lo mismo y no hay
+ * ninguna sentencia gigante.
+ */
+async function insertarPorTandas<T extends { id: string }>(
+  table: 'exercises' | 'tests',
+  rows: T[],
+  size = 150,
+): Promise<void> {
+  for (let i = 0; i < rows.length; i += size) {
+    await db().insertMany(table, rows.slice(i, i + size) as never);
   }
 }
 
@@ -134,55 +157,19 @@ function exerciseRow(seed: SeedExercise, createdAt: string): ExerciseRow {
 }
 
 /**
- * Pone al día una base sembrada con una versión anterior.
+ * Se asegura de que existen las dos cuentas del club, vinculadas entre sí.
  *
- * Retira el equipo de demostración que llegó a desplegarse, deja al jugador con
- * su historial limpio, se asegura de que el entrenador existe con el correo
- * correcto y actualiza la biblioteca global.
+ * Corre en **todos** los arranques, antes que cualquier otra cosa y al margen
+ * del cerrojo de la reconciliación. Es barato —dos búsquedas por índice— y es
+ * la red de seguridad que impide quedarse sin poder entrar: si algo dejó la
+ * base sin cuenta de entrenador, el siguiente arranque la repone.
+ *
+ * Lo aprendimos por las malas: una reconciliación que se cortó entre borrar la
+ * cuenta antigua y crear la nueva dejó la instalación sin acceso, y el cerrojo
+ * impedía reintentarlo.
  */
-async function reconcile(): Promise<void> {
+async function ensureAccounts(): Promise<void> {
   const createdAt = nowIso();
-
-  const borradas = await purgarDemo();
-  if (borradas > 0) console.log(`[lordgym] retiradas ${borradas} cuentas de demostración`);
-
-  const biblioteca = await reconciliarBiblioteca(
-    FULL_LIBRARY.map((seed) => ({
-      name: seed.name,
-      category: seed.category,
-      metricType: seed.metricType,
-      movementType: seed.movementType,
-      muscles: seed.muscles,
-      equipment: seed.equipment,
-      description: seed.description,
-      technique: seed.technique,
-      figureKey: seed.figureKey ?? seed.slug,
-    })),
-    (seed) => exerciseRow(seed as unknown as SeedExercise, createdAt) as unknown as Record<string, unknown>,
-  );
-  console.log(
-    `[lordgym] biblioteca: +${biblioteca.añadidos} nuevos, ${biblioteca.actualizados} actualizados, ` +
-      `-${biblioteca.retirados} retirados`,
-  );
-
-  // Las pruebas físicas que falten.
-  const pruebas = await db().select('tests', { coach_id: null });
-  const tengo = new Set(pruebas.map((row) => row.name.toLowerCase()));
-  const faltan = TEST_LIBRARY.filter((seed) => !tengo.has(seed.name.toLowerCase()));
-  if (faltan.length > 0) {
-    await db().insertMany(
-      'tests',
-      faltan.map((seed) => ({
-        id: newId(),
-        coach_id: null,
-        name: seed.name,
-        unit: seed.unit,
-        category: seed.category,
-        lower_is_better: seed.lowerIsBetter,
-      })),
-    );
-  }
-
   // El entrenador. Si la base se sembró con el correo antiguo, esa cuenta ya se
   // ha ido con la purga: aquí se crea la buena.
   let [coachUser] = await db().select('users', { email: COACH_EMAIL });
@@ -249,11 +236,21 @@ export async function seedInitialData(): Promise<{ seeded: boolean }> {
   await ensureDatabaseReady();
 
   if (!(await claimSeed())) {
-    // Ya estaba sembrada. Si lo fue con otra versión, se pone al día.
+    // Ya estaba sembrada. La red de seguridad va primero y sin cerrojo: nadie
+    // debe poder quedarse sin acceso por culpa de una puesta al día a medias.
+    await ensureAccounts();
+
     const [estado] = await db().select('app_state', { key: SEED_KEY });
     if (estado && estado.value !== SEED_VERSION && (await claimReconcile())) {
       console.log(`[lordgym] poniendo al día el contenido (${estado.value} -> ${SEED_VERSION})`);
-      await reconcile();
+      try {
+        await reconcile();
+      } catch (error) {
+        // Si se corta a medias hay que poder reintentarlo en el siguiente
+        // arranque: se suelta el cerrojo antes de propagar el fallo.
+        await db().removeWhere('app_state', { key: reconcileKey() }).catch(() => {});
+        throw error;
+      }
       // `app_state` se identifica por `key`, no por `id`, y el driver actualiza
       // por identificador: se reemplaza la fila. Sólo llega aquí quien ganó el
       // cerrojo, así que no hay dos procesos escribiéndola a la vez.
@@ -267,7 +264,7 @@ export async function seedInitialData(): Promise<{ seeded: boolean }> {
 
   // --- Biblioteca de ejercicios -------------------------------------------
   const exerciseRows: ExerciseRow[] = FULL_LIBRARY.map((seed) => exerciseRow(seed, createdAt));
-  await db().insertMany('exercises', exerciseRows);
+  await insertarPorTandas('exercises', exerciseRows);
 
   const testRows: TestRow[] = TEST_LIBRARY.map((seed) => ({
     id: newId(),
@@ -321,6 +318,63 @@ export async function seedInitialData(): Promise<{ seeded: boolean }> {
 
   return { seeded: true };
 }
+
+/**
+ * Pone al día una base sembrada con una versión anterior.
+ *
+ * Retira el equipo de demostración que llegó a desplegarse, deja al jugador con
+ * su historial limpio, se asegura de que el entrenador existe con el correo
+ * correcto y actualiza la biblioteca global.
+ */
+async function reconcile(): Promise<void> {
+  const createdAt = nowIso();
+
+  // Antes que nada: que las cuentas existan. Si lo que viene detrás se corta,
+  // al menos se puede entrar.
+  await ensureAccounts();
+
+  const borradas = await purgarDemo();
+  if (borradas > 0) console.log(`[lordgym] retiradas ${borradas} cuentas de demostración`);
+
+  const biblioteca = await reconciliarBiblioteca(
+    FULL_LIBRARY.map((seed) => ({
+      name: seed.name,
+      category: seed.category,
+      metricType: seed.metricType,
+      movementType: seed.movementType,
+      muscles: seed.muscles,
+      equipment: seed.equipment,
+      description: seed.description,
+      technique: seed.technique,
+      figureKey: seed.figureKey ?? seed.slug,
+    })),
+    (seed) => exerciseRow(seed as unknown as SeedExercise, createdAt) as unknown as Record<string, unknown>,
+  );
+  console.log(
+    `[lordgym] biblioteca: +${biblioteca.añadidos} nuevos, ${biblioteca.actualizados} actualizados, ` +
+      `-${biblioteca.retirados} retirados`,
+  );
+
+  // Las pruebas físicas que falten.
+  const pruebas = await db().select('tests', { coach_id: null });
+  const tengo = new Set(pruebas.map((row) => row.name.toLowerCase()));
+  const faltan = TEST_LIBRARY.filter((seed) => !tengo.has(seed.name.toLowerCase()));
+  if (faltan.length > 0) {
+    await db().insertMany(
+      'tests',
+      faltan.map((seed) => ({
+        id: newId(),
+        coach_id: null,
+        name: seed.name,
+        unit: seed.unit,
+        category: seed.category,
+        lower_is_better: seed.lowerIsBetter,
+      })),
+    );
+  }
+
+}
+
 
 /**
  * Garantiza el sembrado una sola vez por proceso.

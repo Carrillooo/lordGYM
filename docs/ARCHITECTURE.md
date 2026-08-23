@@ -167,6 +167,15 @@ La puesta al día se reclama con la misma inserción atómica que el sembrado: e
 Vercel arrancan varias instancias a la vez y sin cerrojo dos podrían reconciliar
 en paralelo.
 
+**Nadie puede quedarse sin acceso.** Antes de cualquier trabajo caro, y al margen
+del cerrojo, cada arranque comprueba que existen las dos cuentas del club y que
+están vinculadas. Cuesta dos búsquedas por índice y evita el fallo que se dio en
+producción: una reconciliación que se cortó entre borrar la cuenta antigua y
+crear la nueva dejó la instalación sin entrenador, y el cerrojo ya tomado impedía
+reintentarlo. Ahora, además, un fallo suelta el cerrojo antes de propagarse, y la
+biblioteca se inserta en tandas de 150 —casi mil filas en una sola sentencia es
+justo lo que se queda a medias en una función con límite de tiempo.
+
 ---
 
 ## Autenticación y autorización
